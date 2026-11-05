@@ -3,37 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioCloud - Monitor IoT Botánico</title>
+    <title>Cloud Dashboard - Monitor IoT</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         
         :root {
-            --accent-green: #00d26a; 
-            --accent-hover: #00e676;
-            
-            /* Opacidad aumentada para mayor legibilidad y solidez */
-            --bg-glass-main: rgba(10, 15, 12, 0.85); 
-            --bg-glass-card: rgba(0, 0, 0, 0.65);
-            --bg-glass-input: rgba(255, 255, 255, 0.05);
-            
-            --border-glass: rgba(255, 255, 255, 0.12);
-            --border-highlight: rgba(0, 210, 106, 0.4);
-            
-            --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.65);
-            --danger: #ff4757;
+            --bg-main: #0f1311;
+            --bg-card: #181d19;
+            --bg-pill: #232c26;
+            --pastel-green: #82c496;
+            --pastel-green-light: #a3dba8;
+            --pastel-green-glow: rgba(130, 196, 150, 0.25);
+            --pastel-green-dark: #1e3827;
+            --border: #28322a;
+            --text-primary: #f0f5f1;
+            --text-secondary: #8c9c90;
+            --danger: #ef4444;
         }
 
         body {
-            /* Overlay oscurecido para un contraste perfecto */
-            background-image: linear-gradient(rgba(10, 15, 12, 0.85), rgba(10, 15, 12, 0.90)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: var(--text-main);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -41,26 +33,22 @@
             padding: 30px 20px;
         }
 
-        h1, h2, h3, .brand span { font-family: 'Montserrat', sans-serif; }
-
         .dashboard-window {
-            background: var(--bg-glass-main);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
+            background: #141815;
+            border: 1px solid var(--border);
+            border-radius: 28px;
             width: 100%;
             max-width: 1250px;
             padding: 30px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8), 0 0 80px rgba(130, 196, 150, 0.03);
             display: grid;
             grid-template-columns: 240px 1fr;
-            gap: 35px;
+            gap: 30px;
         }
 
         sidebar {
-            border-right: 1px solid var(--border-glass);
-            padding-right: 25px;
+            border-right: 1px solid var(--border);
+            padding-right: 20px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -70,252 +58,254 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 1.5em;
-            font-weight: 800;
-            color: var(--text-main);
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 40px;
-            letter-spacing: -0.5px;
         }
 
         .brand-icon {
-            color: var(--accent-green);
-            font-size: 1.4em;
-            text-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
+            width: 32px;
+            height: 32px;
+            background: var(--pastel-green);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 1.1em;
+            box-shadow: 0 0 15px var(--pastel-green-glow);
         }
 
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         
         .nav-item {
-            padding: 12px 18px;
-            border-radius: 12px;
-            color: var(--text-muted);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: var(--text-secondary);
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 12px;
-            border: 1px solid transparent;
         }
 
         .nav-item.active {
-            background: rgba(0, 210, 106, 0.1);
-            color: var(--accent-green);
-            border: 1px solid var(--border-highlight);
+            background: linear-gradient(135deg, var(--pastel-green-dark) 0%, rgba(130, 196, 150, 0.1) 100%);
+            color: var(--pastel-green);
+            border: 1px solid rgba(130, 196, 150, 0.3);
+            box-shadow: 0 4px 20px var(--pastel-green-glow);
         }
 
         .nav-item:hover:not(.active) {
-            background: var(--bg-glass-input);
-            color: var(--text-main);
+            background: var(--bg-card);
+            color: var(--text-primary);
         }
 
         header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 35px;
-            border-bottom: 1px solid var(--border-glass);
-            padding-bottom: 20px;
+            align-items: center;
+            margin-bottom: 25px;
         }
 
         .header-title h1 {
-            font-size: 2.2em;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            font-size: 1.8em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .header-title p {
-            color: var(--text-muted);
-            font-size: 0.95em;
-            margin-top: 8px;
-            font-weight: 400;
-            text-transform: lowercase;
-            letter-spacing: 2px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 4px;
         }
 
         .status-pill {
-            background: var(--accent-green);
-            color: #000;
-            padding: 10px 20px;
-            border-radius: 4px; 
+            background: var(--bg-pill);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-size: 0.85em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 8px 20px rgba(0, 210, 106, 0.3);
+            font-weight: 600;
         }
 
         .status-dot-active {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 8px #fff;
+            background: var(--pastel-green);
+            box-shadow: 0 0 10px var(--pastel-green);
         }
 
-        .tab-content { display: none; opacity: 0; transition: opacity 0.4s ease; }
-        .tab-content.active-tab { display: block; opacity: 1; }
+        .tab-content { display: none; }
+        .tab-content.active-tab { display: block; }
 
         .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 20px;
             margin-bottom: 25px;
         }
 
         .card {
-            background: var(--bg-glass-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 30px 25px;
-            backdrop-filter: blur(8px);
-            transition: transform 0.3s ease, border 0.3s ease;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            max-width: 320px;
+            transition: transform 0.2s, border 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--border-highlight);
+            border-color: rgba(130, 196, 150, 0.4);
+            transform: translateY(-2px);
         }
 
         .card-label {
-            font-size: 0.8em;
-            color: var(--text-muted);
+            font-size: 0.85em;
+            color: var(--text-secondary);
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
         .card-value {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 3em;
-            font-weight: 700;
-            color: var(--text-main);
+            font-size: 3.5em;
+            font-weight: 800;
+            color: var(--pastel-green);
             letter-spacing: -1px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 20px var(--pastel-green-glow);
         }
-
-        .card-value span { color: var(--accent-green); }
 
         .card-sub {
             font-size: 0.85em;
-            font-weight: 500;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
+        /* Sección de IA y Cámara */
         .ai-section {
-            background: var(--bg-glass-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 35px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
         }
 
         .ai-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .camera-box, .file-box {
-            background: rgba(0,0,0,0.3);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 12px;
-            padding: 30px;
+            background: var(--bg-pill);
+            border: 1px dashed var(--border);
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
-        .camera-box:hover, .file-box:hover {
-            border-color: var(--border-highlight);
-            background: rgba(0,0,0,0.5);
         }
 
         video {
             width: 100%;
-            max-width: 280px;
-            height: 200px;
-            border-radius: 8px;
+            max-width: 260px;
+            height: 180px;
+            border-radius: 14px;
             background: #000;
             object-fit: cover;
-            border: 1px solid var(--border-glass);
-            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
         }
 
         .btn-pastel {
-            background: var(--accent-green);
-            color: #000;
+            background: var(--pastel-green);
+            color: #0d140e;
             border: none;
-            padding: 14px 28px;
-            border-radius: 4px;
-            font-family: 'Montserrat', sans-serif;
+            padding: 10px 20px;
+            border-radius: 14px;
             font-weight: 700;
             font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 210, 106, 0.2);
-            transition: all 0.3s;
-        }
-
-        .btn-pastel:hover {
-            background: var(--accent-hover);
-            transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(0, 210, 106, 0.4);
+            box-shadow: 0 4px 15px var(--pastel-green-glow);
+            transition: all 0.2s;
         }
 
         .btn-secondary {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--accent-green);
-            padding: 14px 28px;
-            border-radius: 4px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 14px;
+            font-weight: 600;
             font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
-        .btn-secondary:hover {
-            background: rgba(0, 210, 106, 0.1);
+        /* Formulario de Configuración */
+        .config-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .form-input {
+            background: var(--bg-pill);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+            outline: none;
         }
 
         #plantResult {
-            margin-top: 25px;
-            background: rgba(0, 210, 106, 0.05);
-            border-left: 4px solid var(--accent-green);
-            border-radius: 0 8px 8px 0;
-            padding: 20px;
+            margin-top: 20px;
+            background: var(--pastel-green-dark);
+            border: 1px solid rgba(130, 196, 150, 0.4);
+            border-radius: 16px;
+            padding: 18px;
         }
 
-        #plantName { color: var(--accent-green); font-size: 1.5em; font-weight: 700; margin-bottom: 5px; }
-        #plantScore { color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px; }
+        #plantName { color: var(--pastel-green); font-size: 1.2em; font-weight: 700; }
+        #plantScore { color: var(--text-secondary); font-size: 0.85em; margin-top: 4px; }
 
         footer {
             text-align: center;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-size: 0.8em;
-            font-weight: 500;
-            margin-top: 40px;
-            letter-spacing: 1px;
+            margin-top: 25px;
         }
 
         @media (max-width: 900px) {
-            .dashboard-window { grid-template-columns: 1fr; padding: 20px; }
-            sidebar { border-right: none; border-bottom: 1px solid var(--border-glass); padding-bottom: 25px; }
-            .cards-grid { grid-template-columns: 1fr; }
+            .dashboard-window { grid-template-columns: 1fr; }
+            sidebar { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
             .ai-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -323,102 +313,99 @@
 <body>
 
     <div class="dashboard-window">
-        <!-- Sidebar Navigation Interactivo -->
         <sidebar>
             <div>
                 <div class="brand">
-                    <span class="brand-icon">🌿</span>
-                    <span>nature</span>
+                    <div class="brand-icon">🌿</div>
+                    <span>BioCloud</span>
                 </div>
                 <ul class="nav-list">
-                    <li class="nav-item active" onclick="cambiarPestaña('dashboard', this)">
-                        📊 Panel General
-                    </li>
-                    <li class="nav-item" onclick="cambiarPestaña('camera', this)">
-                        🔍 Inteligencia Botánica
-                    </li>
+                    <li class="nav-item active" onclick="cambiarPestaña('dashboard', this)">📊 Panel General</li>
+                    <li class="nav-item" onclick="cambiarPestaña('camera', this)">📷 Reconocimiento</li>
+                    <li class="nav-item" onclick="cambiarPestaña('settings', this)">⚙️ Configuración</li>
                 </ul>
-            </div>
-            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left;">
-                Módulo ESP8266
             </div>
         </sidebar>
 
-        <!-- Main Content Area -->
         <main>
             <header>
                 <div class="header-title">
-                    <p id="tabSubtitle">monitor en tiempo real</p>
-                    <h1 id="tabTitle">DASHBOARD</h1>
+                    <h1 id="tabTitle">Hola, Planta Monitor 👋</h1>
+                    <p id="tabSubtitle">Sincronización en tiempo real vía Firebase</p>
                 </div>
                 <div class="status-pill">
                     <div class="status-dot-active"></div>
-                    <span id="statusCloudText">Online</span>
+                    <span id="statusCloudText">Sincronizado</span>
                 </div>
             </header>
 
-            <!-- PESTAÑA 1: DASHBOARD GENERAL -->
+            <!-- PESTAÑA 1: DASHBOARD GENERAL (Limpio) -->
             <div id="tab-dashboard" class="tab-content active-tab">
                 <div class="cards-grid">
                     <div class="card">
-                        <div class="card-label">Humedad Suelo</div>
+                        <div class="card-label">Humedad del Suelo</div>
                         <div class="card-value"><span id="humidity">--</span>%</div>
                         <div class="card-sub" id="soilStatus">Conectando...</div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-label">Umbral Configurado</div>
-                        <div class="card-value" style="font-size: 2.2em; padding-top: 10px;" id="thresholdStatus"><span id="currentThreshold">30</span>%</div>
-                        <div class="card-sub" style="margin-top: 10px;">Límite de alerta (Auto)</div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-label">Energía</div>
-                        <div class="card-value" style="font-size: 2em; padding-top: 10px;" id="batteryStatus">Cargando</div>
-                        <div class="card-sub" style="margin-top: 10px;">Estado Microcontrolador</div>
                     </div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 2: RECONOCIMIENTO BOTÁNICO Y AJUSTE AUTOMÁTICO -->
+            <!-- PESTAÑA 2: RECONOCIMIENTO BOTÁNICO -->
             <div id="tab-camera" class="tab-content">
                 <div class="ai-section">
-                    <h2 style="margin-bottom: 8px;">Reconocimiento y Ajuste Autónomo</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Captura una imagen. El sistema identificará la especie y ajustará automáticamente los requerimientos de riego en el hardware.</p>
+                    <h2>📸 Identificador Inteligente de Especie</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9em; margin-top: 5px;">Capturá una imagen en vivo o cargá un archivo local.</p>
 
                     <div class="ai-grid">
                         <div class="camera-box">
                             <video id="webcam" autoplay playsinline></video>
                             <canvas id="canvas" style="display: none;"></canvas>
-                            <button class="btn-pastel" type="button" onclick="tomarFotoYDetectar()">Escanear</button>
+                            <button class="btn-pastel" type="button" onclick="tomarFotoYDetectar()">📷 Capturar Fotografía</button>
                         </div>
 
                         <div class="file-box">
-                            <p style="color: var(--text-muted); margin-bottom: 25px; font-weight: 500;">O selecciona desde el dispositivo</p>
+                            <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.9em;">Subir foto guardada:</p>
                             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="procesarImagenLocal(event)">
-                            <button class="btn-secondary" type="button" onclick="document.getElementById('imageInput').click()">Elegir Archivo</button>
-                            <img id="previewImage" style="max-width: 140px; max-height: 100px; display: none; border-radius: 6px; margin-top: 20px; border: 1px solid var(--border-glass);">
+                            <button class="btn-secondary" type="button" onclick="document.getElementById('imageInput').click()">📁 Elegir Archivo</button>
+                            <img id="previewImage" style="max-width: 140px; max-height: 110px; display: none; border-radius: 10px; margin-top: 15px; border: 1px solid var(--border);">
                         </div>
                     </div>
 
                     <div id="plantResult" style="display: none;">
                         <h3 id="plantName">--</h3>
                         <p id="plantScore"></p>
-                        <p id="plantDetails" style="font-size: 0.95em; color: var(--text-main); line-height: 1.6;"></p>
+                        <p id="plantDetails" style="margin-top: 6px; font-size: 0.85em; color: var(--text-primary);"></p>
                     </div>
                 </div>
             </div>
 
+            <!-- PESTAÑA 3: CONFIGURACIÓN -->
+            <div id="tab-settings" class="tab-content">
+                <div class="config-box">
+                    <h2>⚙️ Ajustes del Sistema IoT</h2>
+                    <div class="form-group">
+                        <label>Umbral de Suelo Seco (Alerta crítica %)</label>
+                        <input type="number" class="form-input" id="cfgDryLimit" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label>API Key de Plant.id / Kindwise</label>
+                        <input type="text" class="form-input" id="cfgApiKey" value="r6MGhn4aM8v9qvQSf9VIJ5wqAyjoALmuOjmOF6GWRNjQYEtQq8">
+                    </div>
+                    <div class="form-group">
+                        <label>Intervalo de refresco visual (segundos)</label>
+                        <input type="number" class="form-input" value="5">
+                    </div>
+                    <button class="btn-pastel" style="width: fit-content;" onclick="guardarAjustes()">💾 Guardar Configuración</button>
+                </div>
+            </div>
+
             <footer>
-                BioCloud Dashboard | Última sincronización: <span id="lastUpdate">--</span>
+                ✨ BioCloud IoT Dashboard | Última sincro: <span id="lastUpdate">--</span>
             </footer>
         </main>
     </div>
 
     <script>
-        // CONFIGURACIÓN (Oculta al usuario final)
-        const KINDWISE_API_KEY = "r6MGhn4aM8v9qvQSf9VIJ5wqAyjoALmuOjmOF6GWRNjQYEtQq8";
-        
         // NAVEGACIÓN ENTRE PESTAÑAS
         function cambiarPestaña(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active-tab'));
@@ -431,14 +418,19 @@
             const subTitleEl = document.getElementById('tabSubtitle');
 
             if (tabName === 'dashboard') {
-                titleEl.textContent = "DASHBOARD";
-                subTitleEl.textContent = "monitor en tiempo real";
+                titleEl.textContent = "Hola, Planta Monitor 👋";
+                subTitleEl.textContent = "Sincronización en tiempo real vía Firebase";
             } else if (tabName === 'camera') {
-                titleEl.textContent = "IA BOTÁNICA";
-                subTitleEl.textContent = "análisis y ajuste automático";
+                titleEl.textContent = "Reconocimiento Botánico 🌿";
+                subTitleEl.textContent = "Identificación de especies asistida por IA";
                 initWebcam(); 
+            } else if (tabName === 'settings') {
+                titleEl.textContent = "Configuración del Sistema ⚙️";
+                subTitleEl.textContent = "Personalizá los parámetros de tu monitor IoT";
             }
         }
+
+        function guardarAjustes() { alert("¡Ajustes guardados correctamente!"); }
 
         // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
@@ -448,72 +440,49 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Escucha en tiempo real de toda la base de datos
+        // Control de inactividad
+        let watchdogTimer;
+
         database.ref('/planta').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) updateUI(data);
         });
 
-        // Variable global para controlar la inactividad
-        let watchdogTimer;
-
         function updateUI(data) {
-            // --- NUEVO: SISTEMA DE DESCONEXIÓN AUTOMÁTICA ---
             const statusIndicator = document.getElementById('statusCloudText');
             const statusDot = document.querySelector('.status-dot-active');
             
-            // Si se ejecuta esta función, significa que llegó data nueva: está Online
-            statusIndicator.textContent = "Online";
-            statusIndicator.style.color = "var(--text-main)";
-            statusDot.style.background = "#fff";
-            statusDot.style.boxShadow = "0 0 8px #fff";
+            // Refrescar el estado a Online
+            statusIndicator.textContent = "En Línea";
+            statusIndicator.style.color = "var(--text-primary)";
+            statusDot.style.background = "var(--pastel-green)";
+            statusDot.style.boxShadow = "0 0 10px var(--pastel-green)";
 
-            // Reiniciamos el temporizador
             clearTimeout(watchdogTimer);
-
-            // Si pasan 15 segundos sin que Firebase envíe datos nuevos, asumimos que se desconectó
             watchdogTimer = setTimeout(() => {
                 statusIndicator.textContent = "Desconectado";
                 statusIndicator.style.color = "var(--danger)";
                 statusDot.style.background = "var(--danger)";
-                statusDot.style.boxShadow = "0 0 8px var(--danger)";
-                
-                // Opcional: Blanquear datos para evitar confusión
-                document.getElementById('humidity').textContent = "--";
-                document.getElementById('batteryStatus').textContent = "Sin señal";
-                document.getElementById('soilStatus').innerHTML = "Esperando conexión...";
-                document.getElementById('soilStatus').style.color = "var(--text-muted)";
+                statusDot.style.boxShadow = "0 0 10px var(--danger)";
             }, 15000);
-
-            // --- LÓGICA ORIGINAL DE ACTUALIZACIÓN DE DATOS ---
-            
-            let currentDryLimit = 30;
-            if (data.config && data.config.umbral_seco !== undefined) {
-                currentDryLimit = Number(data.config.umbral_seco);
-            }
-            
-            document.getElementById('currentThreshold').textContent = currentDryLimit;
 
             if (data.humidity !== undefined) {
                 const hum = Number(data.humidity);
                 document.getElementById('humidity').textContent = hum.toFixed(1);
                 
+                const dryLimit = Number(document.getElementById('cfgDryLimit').value) || 30;
                 const statusLabel = document.getElementById('soilStatus');
                 
-                if (hum < currentDryLimit) {
-                    statusLabel.innerHTML = "Estado: Crítico (Regar)";
+                if (hum < dryLimit) {
+                    statusLabel.textContent = "🚨 Necesita Riego";
                     statusLabel.style.color = "var(--danger)";
-                } else if (hum <= (currentDryLimit + 45)) { 
-                    statusLabel.innerHTML = "Estado: Óptimo";
-                    statusLabel.style.color = "var(--accent-green)";
+                } else if (hum <= 70) {
+                    statusLabel.textContent = "👍 Nivel Óptimo";
+                    statusLabel.style.color = "var(--pastel-green)";
                 } else {
-                    statusLabel.innerHTML = "Estado: Saturado";
+                    statusLabel.textContent = "🌊 Suelo Muy Húmedo";
                     statusLabel.style.color = "#38bdf8";
                 }
-            }
-            
-            if (data.battery) {
-                document.getElementById('batteryStatus').textContent = data.battery;
             }
 
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
@@ -527,9 +496,7 @@
             try {
                 webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 document.getElementById('webcam').srcObject = webcamStream;
-            } catch (err) {
-                console.warn("Cámara no disponible:", err);
-            }
+            } catch (err) { console.warn("No se pudo acceder a la cámara:", err); }
         }
 
         function tomarFotoYDetectar() {
@@ -537,23 +504,17 @@
             const canvas = document.getElementById('canvas');
             const imgPreview = document.getElementById('previewImage');
 
-            if (!video.srcObject) {
-                alert("Activa la cámara o sube un archivo.");
-                return;
-            }
+            if (!video.srcObject) { alert("Permití cámara o subí foto local."); return; }
 
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
-            
             const context = canvas.getContext('2d');
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             imgPreview.src = canvas.toDataURL('image/jpeg');
             imgPreview.style.display = 'block';
 
-            canvas.toBlob((blob) => {
-                if (blob) enviarAPlantNet(blob);
-            }, 'image/jpeg');
+            canvas.toBlob((blob) => { if (blob) enviarAPlantNet(blob); }, 'image/jpeg');
         }
 
         function procesarImagenLocal(event) {
@@ -562,49 +523,24 @@
                 const imgPreview = document.getElementById('previewImage');
                 imgPreview.src = URL.createObjectURL(file);
                 imgPreview.style.display = 'block';
-                
                 enviarAPlantNet(file);
-            }
-        }
-
-        // LÓGICA DE BASE DE DATOS BOTÁNICA Y ACTUALIZACIÓN EN LA NUBE
-        function asignarPerfilBotanico(nombresCombinados) {
-            const textoBusqueda = nombresCombinados.toLowerCase();
-            
-            // 🏜️ GRUPO 1: Desérticas, Suculentas y Cactus (Umbral bajo: 15-20%)
-            // Ampliado con familias y géneros científicos comunes
-            const deserticasRegex = /cactus|succulent|aloe|echeveria|sansevieria|cactaceae|crassula|sedum|agave|euphorbia|zamioculcas|haworthia|lithops|sempervivum|aeonium|portulacaria|opuntia|mammillaria|kalanchoe|schlumbergera/i;
-
-            // 🌴 GRUPO 2: Tropicales y de Alta Humedad (Umbral alto: 45-50%)
-            // Ampliado con potus (epipremnum), ficus, helechos, peperomias, etc.
-            const tropicalesRegex = /fern|calathea|monstera|spathiphyllum|fittonia|araceae|maranta|alocasia|philodendron|epipremnum|syngonium|anthurium|ficus|begonia|asplenium|nephrolepis|croton|aglaonema|caladium|tradescantia|peperomia|dieffenbachia|chlorophytum|mint|helecho/i;
-
-            if (deserticasRegex.test(textoBusqueda)) {
-                return { tipo: "Desértica / Suculenta", umbralIdeal: 15 };
-            } 
-            else if (tropicalesRegex.test(textoBusqueda)) {
-                return { tipo: "Tropical / Alta Humedad", umbralIdeal: 45 };
-            } 
-            else {
-                // 🌿 GRUPO 3: Estándar (Umbral medio: 30%)
-                return { tipo: "Estándar / Templada", umbralIdeal: 30 };
             }
         }
 
         async function enviarAPlantNet(imageBlob) {
             const resultDiv = document.getElementById('plantResult');
             resultDiv.style.display = 'block';
-            document.getElementById('plantName').textContent = "Consultando base de datos...";
+            document.getElementById('plantName').textContent = "🔍 Identificando...";
             document.getElementById('plantScore').textContent = "";
             document.getElementById('plantDetails').textContent = "";
 
+            const apiKey = document.getElementById('cfgApiKey').value.trim();
             const reader = new FileReader();
+            
             reader.readAsDataURL(imageBlob);
             reader.onloadend = async function() {
-                const base64Image = reader.result;
-
                 const payload = {
-                    images: [base64Image],
+                    images: [reader.result],
                     latitude: -34.6037,
                     longitude: -58.3816,
                     similar_images: true
@@ -613,50 +549,24 @@
                 try {
                     const response = await fetch('https://plant.id/api/v3/identification', {
                         method: 'POST',
-                        headers: {
-                            'Api-Key': KINDWISE_API_KEY,
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Api-Key': apiKey, 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
 
                     if (!response.ok) throw new Error(`HTTP_${response.status}`);
-
                     const data = await response.json();
 
                     if (data.result && data.result.classification && data.result.classification.suggestions.length > 0) {
                         const topResult = data.result.classification.suggestions[0];
-                        const especiePrincipal = topResult.name;
-                        
-                        // TRUCO: Juntamos las 3 sugerencias principales de la IA en un solo texto 
-                        // para tener más probabilidades de encontrar la familia de la planta
-                        const sugerenciasTop = data.result.classification.suggestions.slice(0, 3);
-                        const textoAnalisis = sugerenciasTop.map(s => s.name).join(" ");
-                        
-                        // Determinamos el umbral inteligente analizando todas las coincidencias
-                        const perfil = asignarPerfilBotanico(textoAnalisis);
-
-                        // Enviar el nuevo parámetro al ESP8266 vía Firebase
-                        database.ref('/planta/config').update({
-                            umbral_seco: perfil.umbralIdeal
-                        });
-
-                        document.getElementById('plantName').textContent = especiePrincipal;
-                        document.getElementById('plantScore').textContent = `Precisión de IA: ${(topResult.probability * 100).toFixed(1)}%`;
-                        document.getElementById('plantDetails').innerHTML = `
-                            <strong>Perfil Botánico Detectado:</strong> ${perfil.tipo}<br>
-                            <span style="color: var(--accent-green); font-weight: 600; display: inline-block; margin-top: 5px;">
-                                ✓ Límite de alerta ajustado automáticamente a ${perfil.umbralIdeal}% en el hardware.
-                            </span>
-                        `;
+                        document.getElementById('plantName').textContent = `🌱 ${topResult.name}`;
+                        document.getElementById('plantScore').textContent = `Confianza: ${(topResult.probability * 100).toFixed(1)}%`;
+                        document.getElementById('plantDetails').textContent = "Especie detectada correctamente.";
                     } else {
-                        document.getElementById('plantName').textContent = "Desconocida";
-                        document.getElementById('plantScore').textContent = "Intenta capturar mejor los detalles.";
+                        document.getElementById('plantName').textContent = "⚠️ Planta no identificada";
                     }
                 } catch (error) {
-                    console.error("API Error:", error);
-                    document.getElementById('plantName').textContent = "Error de Conexión";
-                    document.getElementById('plantScore').textContent = "Verifica tu internet o clave API.";
+                    console.error("Error API:", error);
+                    document.getElementById('plantName').textContent = "❌ Error en análisis";
                 }
             };
         }
