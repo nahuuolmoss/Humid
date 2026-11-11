@@ -14,318 +14,86 @@
         :root {
             --accent-green: #00d26a; 
             --accent-hover: #00e676;
-            
             --bg-glass-main: rgba(10, 15, 12, 0.85); 
             --bg-glass-card: rgba(0, 0, 0, 0.65);
             --bg-glass-input: rgba(255, 255, 255, 0.05);
-            
             --border-glass: rgba(255, 255, 255, 0.12);
             --border-highlight: rgba(0, 210, 106, 0.4);
-            
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.65);
             --danger: #ff4757;
             --water: #38bdf8;
+            --sun: #facc15;
         }
 
         body {
             background-image: linear-gradient(rgba(10, 15, 12, 0.85), rgba(10, 15, 12, 0.90)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 30px 20px;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 30px 20px;
         }
 
         h1, h2, h3, .brand span { font-family: 'Montserrat', sans-serif; }
 
         .dashboard-window {
-            background: var(--bg-glass-main);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 1250px;
-            padding: 30px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 35px;
+            background: var(--bg-glass-main); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass); border-radius: 24px; width: 100%; max-width: 1250px;
+            padding: 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); display: grid; grid-template-columns: 240px 1fr; gap: 35px;
         }
 
-        sidebar {
-            border-right: 1px solid var(--border-glass);
-            padding-right: 25px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.5em;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 40px;
-            letter-spacing: -0.5px;
-        }
-
-        .brand-icon {
-            color: var(--accent-green);
-            font-size: 1.4em;
-            text-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
-        }
+        sidebar { border-right: 1px solid var(--border-glass); padding-right: 25px; display: flex; flex-direction: column; justify-content: space-between; }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.5em; font-weight: 800; color: var(--text-main); margin-bottom: 40px; letter-spacing: -0.5px; }
+        .brand-icon { color: var(--accent-green); font-size: 1.4em; text-shadow: 0 0 15px rgba(0, 210, 106, 0.4); }
 
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        
-        .nav-item {
-            padding: 12px 18px;
-            border-radius: 12px;
-            color: var(--text-muted);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid transparent;
-        }
+        .nav-item { padding: 12px 18px; border-radius: 12px; color: var(--text-muted); font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; }
+        .nav-item.active { background: rgba(0, 210, 106, 0.1); color: var(--accent-green); border: 1px solid var(--border-highlight); }
+        .nav-item:hover:not(.active) { background: var(--bg-glass-input); color: var(--text-main); }
 
-        .nav-item.active {
-            background: rgba(0, 210, 106, 0.1);
-            color: var(--accent-green);
-            border: 1px solid var(--border-highlight);
-        }
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 35px; border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; }
+        .header-title h1 { font-size: 2.2em; font-weight: 800; color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; }
+        .header-title p { color: var(--text-muted); font-size: 0.95em; margin-top: 8px; font-weight: 400; text-transform: lowercase; letter-spacing: 2px; }
 
-        .nav-item:hover:not(.active) {
-            background: var(--bg-glass-input);
-            color: var(--text-main);
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 35px;
-            border-bottom: 1px solid var(--border-glass);
-            padding-bottom: 20px;
-        }
-
-        .header-title h1 {
-            font-size: 2.2em;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .header-title p {
-            color: var(--text-muted);
-            font-size: 0.95em;
-            margin-top: 8px;
-            font-weight: 400;
-            text-transform: lowercase;
-            letter-spacing: 2px;
-        }
-
-        .status-pill {
-            background: var(--accent-green);
-            color: #000;
-            padding: 10px 20px;
-            border-radius: 4px; 
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.85em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 8px 20px rgba(0, 210, 106, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .status-dot-active {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 8px #fff;
-            transition: all 0.3s ease;
-        }
+        .status-pill { background: var(--accent-green); color: #000; padding: 10px 20px; border-radius: 4px; display: flex; align-items: center; gap: 10px; font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 210, 106, 0.3); transition: all 0.3s ease; }
+        .status-dot-active { width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; transition: all 0.3s ease; }
 
         .tab-content { display: none; opacity: 0; transition: opacity 0.4s ease; }
         .tab-content.active-tab { display: block; opacity: 1; }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-            max-width: 800px;
-        }
-
-        .card {
-            background: var(--bg-glass-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 30px 25px;
-            backdrop-filter: blur(8px);
-            transition: transform 0.3s ease, border 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--border-highlight);
-        }
-
-        .card-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .card-label {
-            font-size: 0.8em;
-            color: var(--text-muted);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 15px;
-        }
-
-        .card-value {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 3em;
-            font-weight: 700;
-            color: var(--text-main);
-            letter-spacing: -1px;
-            margin-bottom: 8px;
-        }
-
+        .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; width: 100%; }
+        .card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 30px 25px; backdrop-filter: blur(8px); transition: transform 0.3s ease, border 0.3s ease; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-5px); border-color: var(--border-highlight); }
+        .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-label { font-size: 0.8em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; }
+        .card-value { font-family: 'Montserrat', sans-serif; font-size: 3em; font-weight: 700; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
         .card-value span { color: var(--accent-green); transition: color 0.3s ease; }
+        .card-sub { font-size: 0.85em; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease; }
+        .dual-val { font-size: 2.2em; display: flex; gap: 15px; }
 
-        .card-sub {
-            font-size: 0.85em;
-            font-weight: 500;
-            color: var(--text-muted);
-            transition: color 0.3s ease;
-        }
-
-        /* --- SISTEMA DE AVATARES Y REACCIONES --- */
-        .plant-avatar {
-            font-size: 2.8em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50%;
-            transition: all 0.5s ease;
-        }
-
-        .reaction-text {
-            font-size: 0.9em;
-            font-weight: 600;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-glass);
-            transition: color 0.3s ease;
-        }
-
-        .avatar-happy {
-            border: 1px solid rgba(0, 210, 106, 0.5);
-            box-shadow: 0 0 20px rgba(0, 210, 106, 0.2);
-            text-shadow: 0 0 15px rgba(0, 210, 106, 0.4);
-        }
-
-        .avatar-drowning {
-            border: 1px solid rgba(56, 189, 248, 0.5);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-        }
-
-        @keyframes pulse-danger {
-            0% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); }
-            50% { box-shadow: 0 0 35px rgba(255, 71, 87, 0.7); transform: scale(1.05); }
-            100% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); }
-        }
-
-        .avatar-thirsty {
-            border: 1px solid rgba(255, 71, 87, 0.8);
-            animation: pulse-danger 1.5s infinite;
-            text-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
-        }
+        /* Avatares */
+        .plant-avatar { font-size: 2.8em; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transition: all 0.5s ease; }
+        .reaction-text { font-size: 0.9em; font-weight: 600; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-glass); transition: color 0.3s ease; }
+        .avatar-happy { border: 1px solid rgba(0, 210, 106, 0.5); box-shadow: 0 0 20px rgba(0, 210, 106, 0.2); text-shadow: 0 0 15px rgba(0, 210, 106, 0.4); }
+        .avatar-drowning { border: 1px solid rgba(56, 189, 248, 0.5); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        @keyframes pulse-danger { 0% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } 50% { box-shadow: 0 0 35px rgba(255, 71, 87, 0.7); transform: scale(1.05); } 100% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } }
+        .avatar-thirsty { border: 1px solid rgba(255, 71, 87, 0.8); animation: pulse-danger 1.5s infinite; text-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
 
         .card-full-width { grid-column: 1 / -1; padding: 25px; }
         .chart-container { position: relative; height: 250px; width: 100%; }
 
-        .ai-section {
-            background: var(--bg-glass-card);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 35px;
-        }
-
+        .ai-section { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 35px; }
         .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
-
-        .camera-box, .file-box {
-            background: rgba(0,0,0,0.3);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        
+        .camera-box, .file-box { background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; }
         .camera-box:hover, .file-box:hover { border-color: var(--border-highlight); background: rgba(0,0,0,0.5); }
-
-        video {
-            width: 100%; max-width: 280px; height: 200px;
-            border-radius: 8px; background: #000; object-fit: cover;
-            border: 1px solid var(--border-glass); margin-bottom: 20px;
-        }
-
-        .btn-pastel {
-            background: var(--accent-green); color: #000; border: none;
-            padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; font-size: 0.9em; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 106, 0.2);
-            transition: all 0.3s;
-        }
-
+        video { width: 100%; max-width: 280px; height: 200px; border-radius: 8px; background: #000; object-fit: cover; border: 1px solid var(--border-glass); margin-bottom: 20px; }
+        
+        .btn-pastel { background: var(--accent-green); color: #000; border: none; padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 106, 0.2); transition: all 0.3s; }
         .btn-pastel:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 6px 20px rgba(0, 210, 106, 0.4); }
-
-        .btn-secondary {
-            background: transparent; color: var(--text-main); border: 1px solid var(--accent-green);
-            padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif;
-            font-weight: 700; font-size: 0.9em; text-transform: uppercase;
-            letter-spacing: 1px; cursor: pointer; transition: all 0.3s;
-        }
-
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--accent-green); padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; }
         .btn-secondary:hover { background: rgba(0, 210, 106, 0.1); }
 
-        #plantResult {
-            margin-top: 25px; background: rgba(0, 210, 106, 0.05);
-            border-left: 4px solid var(--accent-green); border-radius: 0 8px 8px 0; padding: 20px;
-        }
-
+        #plantResult { margin-top: 25px; background: rgba(0, 210, 106, 0.05); border-left: 4px solid var(--accent-green); border-radius: 0 8px 8px 0; padding: 20px; }
         #plantName { color: var(--accent-green); font-size: 1.5em; font-weight: 700; margin-bottom: 5px; }
         #plantScore { color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px; }
-
         footer { text-align: center; color: var(--text-muted); font-size: 0.8em; font-weight: 500; margin-top: 40px; letter-spacing: 1px; }
 
         @media (max-width: 900px) {
@@ -339,28 +107,21 @@
 <body>
 
     <div class="dashboard-window">
-        <!-- Sidebar Navigation -->
         <sidebar>
             <div>
-                <div class="brand">
-                    <span class="brand-icon">🌿</span>
-                    <span>nature</span>
-                </div>
+                <div class="brand"><span class="brand-icon">🌿</span><span>nature</span></div>
                 <ul class="nav-list">
                     <li class="nav-item active" onclick="cambiarPestaña('dashboard', this)">📊 Panel General</li>
                     <li class="nav-item" onclick="cambiarPestaña('camera', this)">🔍 Inteligencia Botánica</li>
                 </ul>
             </div>
-            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left;">
-                Módulo ESP8266
-            </div>
+            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Módulo ESP8266</div>
         </sidebar>
 
-        <!-- Main Content Area -->
         <main>
             <header>
                 <div class="header-title">
-                    <p id="tabSubtitle">monitor en tiempo real</p>
+                    <p id="tabSubtitle">monitor ambiental en tiempo real</p>
                     <h1 id="tabTitle">DASHBOARD</h1>
                 </div>
                 <div class="status-pill" id="statusPillBox">
@@ -369,54 +130,66 @@
                 </div>
             </header>
 
-            <!-- PESTAÑA 1: DASHBOARD GENERAL -->
             <div id="tab-dashboard" class="tab-content active-tab">
                 <div class="cards-grid">
                     
-                    <!-- TARJETA 1: HUMEDAD CON AVATAR DINÁMICO -->
+                    <!-- 1. Suelo -->
                     <div class="card">
                         <div class="card-header-flex">
                             <div>
-                                <div class="card-label">Humedad Suelo</div>
+                                <div class="card-label">Sustrato (A0)</div>
                                 <div class="card-value"><span id="humidity">--</span>%</div>
                                 <div class="card-sub" id="soilStatus">Esperando datos...</div>
                             </div>
-                            <!-- Contenedor del Avatar Botánico -->
                             <div class="plant-avatar" id="plantAvatar">🌱</div>
                         </div>
-                        <!-- Mensaje en primera persona -->
                         <div class="reaction-text" id="reactionText">Iniciando sistema vital...</div>
                     </div>
 
+                    <!-- 2. Luz BH1750 -->
                     <div class="card">
-                        <div class="card-label">Umbral Configurado</div>
-                        <div class="card-value" style="font-size: 2.2em; padding-top: 10px;" id="thresholdStatus"><span id="currentThreshold">30</span>%</div>
-                        <div class="card-sub" style="margin-top: 10px;">Límite de alerta (Auto)</div>
+                        <div class="card-label">Luz Ambiental (I2C)</div>
+                        <div class="card-value"><span style="color: var(--sun);" id="lightLux">--</span> lx</div>
+                        <div class="card-sub" id="lightStatus" style="margin-top: 10px;">Analizando exposición...</div>
                     </div>
 
-                    <!-- TARJETA 3: GRÁFICO EN TIEMPO REAL -->
-                    <div class="card card-full-width">
-                        <div class="card-label">Tendencia de Humedad (Últimos minutos)</div>
-                        <div class="chart-container">
-                            <canvas id="humidityChart"></canvas>
+                    <!-- 3. Microclima DHT22 -->
+                    <div class="card">
+                        <div class="card-label">Clima Ambiental (D4)</div>
+                        <div class="card-value dual-val">
+                            <div><span style="color: var(--danger);" id="airTemp">--</span><span style="font-size: 0.5em;">°C</span></div>
+                            <div style="color: var(--border-glass);">|</div>
+                            <div><span style="color: var(--water);" id="airHum">--</span><span style="font-size: 0.5em;">%</span></div>
                         </div>
+                        <div class="card-sub" style="margin-top: 10px;">Sensación Térmica: <span id="heatIndex" style="color: #fff; font-weight: 700;">--</span> °C</div>
+                    </div>
+
+                    <!-- 4. Umbral Botánico -->
+                    <div class="card">
+                        <div class="card-label">Umbral Botánico Inteligente</div>
+                        <div class="card-value" style="font-size: 2.5em; padding-top: 10px;"><span id="currentThreshold">30</span>%</div>
+                        <div class="card-sub" style="margin-top: 10px;">Configurado por la IA (Kindwise)</div>
+                    </div>
+
+                    <!-- Gráfico -->
+                    <div class="card card-full-width">
+                        <div class="card-label">Tendencia de Humedad del Suelo</div>
+                        <div class="chart-container"><canvas id="humidityChart"></canvas></div>
                     </div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 2: RECONOCIMIENTO BOTÁNICO Y AJUSTE AUTOMÁTICO -->
+            <!-- Pestaña IA (Sin cambios) -->
             <div id="tab-camera" class="tab-content">
                 <div class="ai-section">
                     <h2 style="margin-bottom: 8px;">Reconocimiento y Ajuste Autónomo</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Captura una imagen. El sistema identificará la especie y ajustará automáticamente los requerimientos de riego en el hardware.</p>
-
+                    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Captura una imagen. El sistema identificará la especie y ajustará automáticamente los requerimientos en el hardware.</p>
                     <div class="ai-grid">
                         <div class="camera-box">
                             <video id="webcam" autoplay playsinline></video>
                             <canvas id="canvas" style="display: none;"></canvas>
                             <button class="btn-pastel" type="button" onclick="tomarFotoYDetectar()">Escanear</button>
                         </div>
-
                         <div class="file-box">
                             <p style="color: var(--text-muted); margin-bottom: 25px; font-weight: 500;">O selecciona desde el dispositivo</p>
                             <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="procesarImagenLocal(event)">
@@ -424,238 +197,147 @@
                             <img id="previewImage" style="max-width: 140px; max-height: 100px; display: none; border-radius: 6px; margin-top: 20px; border: 1px solid var(--border-glass);">
                         </div>
                     </div>
-
                     <div id="plantResult" style="display: none;">
-                        <h3 id="plantName">--</h3>
-                        <p id="plantScore"></p>
-                        <p id="plantDetails" style="font-size: 0.95em; color: var(--text-main); line-height: 1.6;"></p>
+                        <h3 id="plantName">--</h3><p id="plantScore"></p><p id="plantDetails" style="font-size: 0.95em; color: var(--text-main); line-height: 1.6;"></p>
                     </div>
                 </div>
             </div>
 
-            <footer>
-                BioCloud Dashboard | Última sincronización: <span id="lastUpdate">--</span>
-            </footer>
+            <footer>BioCloud Dashboard | Última sincronización: <span id="lastUpdate">--</span></footer>
         </main>
     </div>
 
     <script>
         const KINDWISE_API_KEY = "r6MGhn4aM8v9qvQSf9VIJ5wqAyjoALmuOjmOF6GWRNjQYEtQq8";
         
-        // --- LÓGICA DEL GRÁFICO (Chart.js) ---
-        let humidityChart;
-        const maxDataPoints = 30; 
-        const chartLabels = [];
-        const chartData = [];
+        let humidityChart; const maxDataPoints = 30; const chartLabels = []; const chartData = [];
 
         function initChart() {
             const ctx = document.getElementById('humidityChart').getContext('2d');
             const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-            gradient.addColorStop(0, 'rgba(0, 210, 106, 0.4)');
-            gradient.addColorStop(1, 'rgba(0, 210, 106, 0)');
-
+            gradient.addColorStop(0, 'rgba(0, 210, 106, 0.4)'); gradient.addColorStop(1, 'rgba(0, 210, 106, 0)');
             humidityChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Humedad (%)',
-                        data: chartData,
-                        borderColor: '#00d26a',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#00d26a',
-                        pointBorderColor: '#181d19',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } },
-                        x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)', maxTicksLimit: 10 } }
-                    },
-                    plugins: { legend: { display: false } },
-                    animation: { duration: 800, easing: 'easeOutQuart' }
-                }
+                data: { labels: chartLabels, datasets: [{ data: chartData, borderColor: '#00d26a', backgroundColor: gradient, borderWidth: 2, fill: true, tension: 0.4, pointBackgroundColor: '#00d26a', pointRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } } }, plugins: { legend: { display: false } } }
             });
         }
 
         function updateChartData(newHumidity) {
             if (!humidityChart) return;
-            const now = new Date();
-            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
-            chartLabels.push(timeString);
-            chartData.push(newHumidity);
+            const now = new Date(); const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+            chartLabels.push(timeString); chartData.push(newHumidity);
             if (chartData.length > maxDataPoints) { chartLabels.shift(); chartData.shift(); }
             humidityChart.update();
         }
-
         window.addEventListener('load', initChart);
 
         function cambiarPestaña(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active-tab'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(`tab-${tabName}`).classList.add('active-tab');
-            element.classList.add('active');
-
-            const titleEl = document.getElementById('tabTitle');
-            const subTitleEl = document.getElementById('tabSubtitle');
-
-            if (tabName === 'dashboard') { titleEl.textContent = "DASHBOARD"; subTitleEl.textContent = "monitor en tiempo real"; } 
-            else if (tabName === 'camera') { titleEl.textContent = "IA BOTÁNICA"; subTitleEl.textContent = "análisis y ajuste automático"; initWebcam(); }
+            document.getElementById(`tab-${tabName}`).classList.add('active-tab'); element.classList.add('active');
+            if (tabName === 'camera') initWebcam(); 
         }
 
         const firebaseConfig = { databaseURL: "https://planta-iot-43aeb-default-rtdb.firebaseio.com/" };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        firebase.initializeApp(firebaseConfig); const database = firebase.database();
         let watchdogTimer;
 
         database.ref('/planta').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) updateUI(data);
+            const data = snapshot.val(); if (data) updateUI(data);
         });
 
         function updateUI(data) {
             const statusIndicator = document.getElementById('statusCloudText');
-            const statusDot = document.getElementById('statusDot');
             const statusPillBox = document.getElementById('statusPillBox');
+            const statusDot = document.getElementById('statusDot');
             
-            statusIndicator.textContent = "Online";
-            statusPillBox.style.background = "var(--accent-green)";
-            statusPillBox.style.color = "#000";
-            statusDot.style.background = "#fff";
-            statusDot.style.boxShadow = "0 0 8px #fff";
-
+            statusIndicator.textContent = "Online"; statusPillBox.style.background = "var(--accent-green)"; statusPillBox.style.color = "#000"; statusDot.style.background = "#fff";
             clearTimeout(watchdogTimer);
             watchdogTimer = setTimeout(() => {
-                statusIndicator.textContent = "Offline";
-                statusPillBox.style.background = "transparent";
-                statusPillBox.style.border = "1px solid var(--danger)";
-                statusPillBox.style.color = "var(--danger)";
-                statusDot.style.background = "var(--danger)";
-                statusDot.style.boxShadow = "0 0 10px var(--danger)";
+                statusIndicator.textContent = "Offline"; statusPillBox.style.background = "transparent"; statusPillBox.style.border = "1px solid var(--danger)"; statusPillBox.style.color = "var(--danger)"; statusDot.style.background = "var(--danger)";
             }, 15000); 
 
             let currentDryLimit = 30;
             if (data.config && data.config.umbral_seco !== undefined) { currentDryLimit = Number(data.config.umbral_seco); }
             document.getElementById('currentThreshold').textContent = currentDryLimit;
 
+            // Suelo y Avatar
             if (data.humidity !== undefined) {
                 const hum = Number(data.humidity);
-                const humEl = document.getElementById('humidity');
-                const statusLabel = document.getElementById('soilStatus');
-                const avatar = document.getElementById('plantAvatar');
-                const reactionText = document.getElementById('reactionText');
-
-                humEl.textContent = hum.toFixed(1);
-                updateChartData(hum);
+                const humEl = document.getElementById('humidity'); const statusLabel = document.getElementById('soilStatus');
+                const avatar = document.getElementById('plantAvatar'); const reactionText = document.getElementById('reactionText');
+                humEl.textContent = hum.toFixed(1); updateChartData(hum);
                 
-                // Lógica Dinámica de Reacciones y Avatares
                 if (hum < currentDryLimit) {
-                    // CRÍTICO
-                    humEl.style.color = "var(--danger)";
-                    statusLabel.innerHTML = "Estado: Crítico (Regar)";
-                    statusLabel.style.color = "var(--danger)";
-                    avatar.innerHTML = "🥀";
-                    avatar.className = "plant-avatar avatar-thirsty";
-                    reactionText.innerHTML = "¡Por favor, necesito agua urgente!";
-                    reactionText.style.color = "var(--danger)";
+                    humEl.style.color = "var(--danger)"; statusLabel.innerHTML = "Estado: Crítico (Regar)"; statusLabel.style.color = "var(--danger)";
+                    avatar.innerHTML = "🥀"; avatar.className = "plant-avatar avatar-thirsty"; reactionText.innerHTML = "¡Por favor, necesito agua urgente!"; reactionText.style.color = "var(--danger)";
                 } else if (hum <= (currentDryLimit + 45)) { 
-                    // ÓPTIMO
-                    humEl.style.color = "var(--accent-green)";
-                    statusLabel.innerHTML = "Estado: Óptimo";
-                    statusLabel.style.color = "var(--accent-green)";
-                    avatar.innerHTML = "🌿";
-                    avatar.className = "plant-avatar avatar-happy";
-                    reactionText.innerHTML = "¡Me siento fresca y saludable!";
-                    reactionText.style.color = "var(--accent-green)";
+                    humEl.style.color = "var(--accent-green)"; statusLabel.innerHTML = "Estado: Óptimo"; statusLabel.style.color = "var(--accent-green)";
+                    avatar.innerHTML = "🌿"; avatar.className = "plant-avatar avatar-happy"; reactionText.innerHTML = "¡Me siento fresca y saludable!"; reactionText.style.color = "var(--accent-green)";
                 } else {
-                    // SATURADO
-                    humEl.style.color = "var(--water)";
-                    statusLabel.innerHTML = "Estado: Saturado";
-                    statusLabel.style.color = "var(--water)";
-                    avatar.innerHTML = "💧";
-                    avatar.className = "plant-avatar avatar-drowning";
-                    reactionText.innerHTML = "¡Glup! Hay demasiada agua en la tierra.";
-                    reactionText.style.color = "var(--water)";
+                    humEl.style.color = "var(--water)"; statusLabel.innerHTML = "Estado: Saturado"; statusLabel.style.color = "var(--water)";
+                    avatar.innerHTML = "💧"; avatar.className = "plant-avatar avatar-drowning"; reactionText.innerHTML = "¡Glup! Hay demasiada agua en la tierra."; reactionText.style.color = "var(--water)";
                 }
             }
+
+            // Luz BH1750
+            if (data.light !== undefined) {
+                const lux = Number(data.light);
+                document.getElementById('lightLux').textContent = lux.toFixed(0);
+                const lStatus = document.getElementById('lightStatus');
+                if (lux < 50) lStatus.textContent = "Sombra profunda / Noche";
+                else if (lux < 500) lStatus.textContent = "Luz de interior suave";
+                else if (lux < 5000) lStatus.textContent = "Luz indirecta brillante";
+                else lStatus.textContent = "Exposición solar directa";
+            }
+
+            // Microclima DHT22
+            if (data.temperature !== undefined) document.getElementById('airTemp').textContent = Number(data.temperature).toFixed(1);
+            if (data.air_humidity !== undefined) document.getElementById('airHum').textContent = Number(data.air_humidity).toFixed(1);
+            if (data.heat_index !== undefined) document.getElementById('heatIndex').textContent = Number(data.heat_index).toFixed(1);
 
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
         }
 
+        // --- CÁMARA E IA BOTÁNICA (Se mantiene igual) ---
         let webcamStream = null;
-        async function initWebcam() {
-            if (webcamStream) return;
-            try { webcamStream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('webcam').srcObject = webcamStream; } 
-            catch (err) { console.warn("Cámara no disponible:", err); }
-        }
-
+        async function initWebcam() { if (webcamStream) return; try { webcamStream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('webcam').srcObject = webcamStream; } catch (err) {} }
         function tomarFotoYDetectar() {
-            const video = document.getElementById('webcam');
-            const canvas = document.getElementById('canvas');
-            const imgPreview = document.getElementById('previewImage');
-            if (!video.srcObject) { alert("Activa la cámara o sube un archivo."); return; }
+            const video = document.getElementById('webcam'); const canvas = document.getElementById('canvas'); const imgPreview = document.getElementById('previewImage');
+            if (!video.srcObject) return;
             canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             imgPreview.src = canvas.toDataURL('image/jpeg'); imgPreview.style.display = 'block';
             canvas.toBlob((blob) => { if (blob) enviarAPlantNet(blob); }, 'image/jpeg');
         }
-
         function procesarImagenLocal(event) {
             const file = event.target.files[0];
-            if (file) {
-                const imgPreview = document.getElementById('previewImage');
-                imgPreview.src = URL.createObjectURL(file); imgPreview.style.display = 'block';
-                enviarAPlantNet(file);
-            }
+            if (file) { document.getElementById('previewImage').src = URL.createObjectURL(file); document.getElementById('previewImage').style.display = 'block'; enviarAPlantNet(file); }
         }
-
         function asignarPerfilBotanico(nombresCombinados) {
-            const textoBusqueda = nombresCombinados.toLowerCase();
-            const deserticasRegex = /cactus|succulent|aloe|echeveria|sansevieria|cactaceae|crassula|sedum|agave|euphorbia|zamioculcas|haworthia|lithops|sempervivum|aeonium|portulacaria|opuntia|mammillaria|kalanchoe|schlumbergera/i;
-            const tropicalesRegex = /fern|calathea|monstera|spathiphyllum|fittonia|araceae|maranta|alocasia|philodendron|epipremnum|syngonium|anthurium|ficus|begonia|asplenium|nephrolepis|croton|aglaonema|caladium|tradescantia|peperomia|dieffenbachia|chlorophytum|mint|helecho/i;
-            if (deserticasRegex.test(textoBusqueda)) return { tipo: "Desértica / Suculenta", umbralIdeal: 15 };
-            else if (tropicalesRegex.test(textoBusqueda)) return { tipo: "Tropical / Alta Humedad", umbralIdeal: 45 };
+            const t = nombresCombinados.toLowerCase();
+            if (/cactus|succulent|aloe|echeveria|sansevieria|cactaceae|crassula|sedum|agave|euphorbia|zamioculcas|haworthia|lithops|sempervivum|aeonium|portulacaria|opuntia|mammillaria|kalanchoe|schlumbergera/i.test(t)) return { tipo: "Desértica / Suculenta", umbralIdeal: 15 };
+            else if (/fern|calathea|monstera|spathiphyllum|fittonia|araceae|maranta|alocasia|philodendron|epipremnum|syngonium|anthurium|ficus|begonia|asplenium|nephrolepis|croton|aglaonema|caladium|tradescantia|peperomia|dieffenbachia|chlorophytum|mint|helecho/i.test(t)) return { tipo: "Tropical / Alta Humedad", umbralIdeal: 45 };
             else return { tipo: "Estándar / Templada", umbralIdeal: 30 };
         }
-
         async function enviarAPlantNet(imageBlob) {
             const resultDiv = document.getElementById('plantResult'); resultDiv.style.display = 'block';
-            document.getElementById('plantName').textContent = "Consultando base de datos...";
-            document.getElementById('plantScore').textContent = ""; document.getElementById('plantDetails').textContent = "";
+            document.getElementById('plantName').textContent = "Consultando base de datos..."; document.getElementById('plantScore').textContent = ""; document.getElementById('plantDetails').textContent = "";
             const reader = new FileReader(); reader.readAsDataURL(imageBlob);
             reader.onloadend = async function() {
                 try {
-                    const response = await fetch('https://plant.id/api/v3/identification', {
-                        method: 'POST', headers: { 'Api-Key': KINDWISE_API_KEY, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ images: [reader.result], latitude: -34.6037, longitude: -58.3816, similar_images: true })
-                    });
-                    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+                    const response = await fetch('https://plant.id/api/v3/identification', { method: 'POST', headers: { 'Api-Key': KINDWISE_API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ images: [reader.result], latitude: -34.6037, longitude: -58.3816, similar_images: true }) });
+                    if (!response.ok) throw new Error();
                     const data = await response.json();
                     if (data.result && data.result.classification && data.result.classification.suggestions.length > 0) {
-                        const topResult = data.result.classification.suggestions[0];
-                        const textoAnalisis = data.result.classification.suggestions.slice(0, 3).map(s => s.name).join(" ");
-                        const perfil = asignarPerfilBotanico(textoAnalisis);
+                        const top = data.result.classification.suggestions[0];
+                        const perfil = asignarPerfilBotanico(data.result.classification.suggestions.slice(0, 3).map(s => s.name).join(" "));
                         database.ref('/planta/config').update({ umbral_seco: perfil.umbralIdeal });
-                        document.getElementById('plantName').textContent = topResult.name;
-                        document.getElementById('plantScore').textContent = `Precisión de IA: ${(topResult.probability * 100).toFixed(1)}%`;
-                        document.getElementById('plantDetails').innerHTML = `<strong>Perfil Botánico Detectado:</strong> ${perfil.tipo}<br><span style="color: var(--accent-green); font-weight: 600; display: inline-block; margin-top: 5px;">✓ Límite de alerta ajustado automáticamente a ${perfil.umbralIdeal}% en el hardware.</span>`;
-                    } else {
-                        document.getElementById('plantName').textContent = "Desconocida";
-                        document.getElementById('plantScore').textContent = "Intenta capturar mejor los detalles.";
+                        document.getElementById('plantName').textContent = top.name; document.getElementById('plantScore').textContent = `Precisión: ${(top.probability * 100).toFixed(1)}%`;
+                        document.getElementById('plantDetails').innerHTML = `<strong>Perfil Botánico:</strong> ${perfil.tipo}<br><span style="color: var(--accent-green);">✓ Umbral de riego ajustado a ${perfil.umbralIdeal}%.</span>`;
                     }
-                } catch (error) {
-                    console.error("API Error:", error);
-                    document.getElementById('plantName').textContent = "Error de Conexión";
-                    document.getElementById('plantScore').textContent = "Verifica tu internet o clave API.";
-                }
+                } catch (error) { document.getElementById('plantName').textContent = "Error de Conexión"; }
             };
         }
     </script>
