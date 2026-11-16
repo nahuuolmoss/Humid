@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioCloud - Monitor IoT Botánico</title>
+    <title>Humid | Smart Botany</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -91,6 +91,15 @@
         .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--accent-green); padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; }
         .btn-secondary:hover { background: rgba(0, 210, 106, 0.1); }
 
+        /* Formularios de Configuración */
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+        .form-group label { font-size: 0.8em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .form-input { width: 100%; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--border-glass); padding: 14px 16px; border-radius: 8px; color: var(--text-main); font-size: 0.95em; outline: none; transition: border 0.3s; }
+        .form-input:focus { border-color: var(--accent-green); }
+        .toggle-pass { position: absolute; right: 14px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1em; }
+        .feedback-msg { margin-top: 12px; font-size: 0.85em; font-weight: 600; min-height: 20px; }
+
         #plantResult { margin-top: 25px; background: rgba(0, 210, 106, 0.05); border-left: 4px solid var(--accent-green); border-radius: 0 8px 8px 0; padding: 20px; }
         #plantName { color: var(--accent-green); font-size: 1.5em; font-weight: 700; margin-bottom: 5px; }
         #plantScore { color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px; }
@@ -113,9 +122,12 @@
                 <ul class="nav-list">
                     <li class="nav-item active" onclick="cambiarPestaña('dashboard', this)">📊 Panel General</li>
                     <li class="nav-item" onclick="cambiarPestaña('camera', this)">🔍 Inteligencia Botánica</li>
+                    <li class="nav-item" onclick="cambiarPestaña('settings', this)">⚙️ Configuración</li>
                 </ul>
             </div>
-            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Módulo ESP8266</div>
+            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                Red: <span id="sidebarWifiName" style="color: var(--accent-green);">--</span>
+            </div>
         </sidebar>
 
         <main>
@@ -130,6 +142,7 @@
                 </div>
             </header>
 
+            <!-- PESTAÑA 1: DASHBOARD GENERAL -->
             <div id="tab-dashboard" class="tab-content active-tab">
                 <div class="cards-grid">
                     
@@ -166,9 +179,9 @@
 
                     <!-- 4. Umbral Botánico -->
                     <div class="card">
-                        <div class="card-label">Umbral Botánico Inteligente</div>
+                        <div class="card-label">Umbral Mínimo Activo</div>
                         <div class="card-value" style="font-size: 2.5em; padding-top: 10px;"><span id="currentThreshold">30</span>%</div>
-                        <div class="card-sub" style="margin-top: 10px;">Configurado por la IA (Kindwise)</div>
+                        <div class="card-sub" style="margin-top: 10px;">Ajustable por IA o manualmente</div>
                     </div>
 
                     <!-- Gráfico -->
@@ -179,7 +192,7 @@
                 </div>
             </div>
 
-            <!-- Pestaña IA (Sin cambios) -->
+            <!-- PESTAÑA 2: RECONOCIMIENTO BOTÁNICO -->
             <div id="tab-camera" class="tab-content">
                 <div class="ai-section">
                     <h2 style="margin-bottom: 8px;">Reconocimiento y Ajuste Autónomo</h2>
@@ -203,7 +216,49 @@
                 </div>
             </div>
 
-            <footer>BioCloud Dashboard | Última sincronización: <span id="lastUpdate">--</span></footer>
+            <!-- PESTAÑA 3: CONFIGURACIÓN MANUAL (UMBRAL + WIFI EN LA NUBE) -->
+            <div id="tab-settings" class="tab-content">
+                <div class="cards-grid">
+                    
+                    <!-- Tarjeta A: Control Manual de Humedad -->
+                    <div class="card">
+                        <h2 style="margin-bottom: 8px; font-size: 1.3em;">💧 Umbral de Humedad Mínimo</h2>
+                        <p style="color: var(--text-muted); font-size: 0.88em; margin-bottom: 22px; line-height: 1.5;">
+                            Define manualmente el porcentaje mínimo antes de enviar la alerta a WhatsApp. Sobrescribe el valor de la IA.
+                        </p>
+                        <div class="form-group">
+                            <label for="manualThresholdInput">Porcentaje Mínimo de Alerta (5% - 95%)</label>
+                            <input type="number" id="manualThresholdInput" class="form-input" min="5" max="95" value="30">
+                        </div>
+                        <button class="btn-pastel" type="button" onclick="guardarUmbralManual()">Guardar Umbral</button>
+                        <div class="feedback-msg" id="thresholdFeedback"></div>
+                    </div>
+
+                    <!-- Tarjeta B: Credenciales Wi-Fi en la Nube -->
+                    <div class="card">
+                        <h2 style="margin-bottom: 8px; font-size: 1.3em;">📡 Conexión Wi-Fi del Monitor</h2>
+                        <p style="color: var(--text-muted); font-size: 0.88em; margin-bottom: 22px; line-height: 1.5;">
+                            Guarda una nueva red Wi-Fi (2.4 GHz) en la nube. El microcontrolador la leerá, la almacenará en su memoria interna y se reconectará.
+                        </p>
+                        <div class="form-group">
+                            <label for="wifiSsidInput">Nombre de la Red (SSID)</label>
+                            <input type="text" id="wifiSsidInput" class="form-input" placeholder="Ej: MiWiFi_Casa">
+                        </div>
+                        <div class="form-group">
+                            <label for="wifiPassInput">Contraseña del Wi-Fi</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="wifiPassInput" class="form-input" placeholder="Ingresa la contraseña">
+                                <button type="button" class="toggle-pass" onclick="alternarPassword()">👁️</button>
+                            </div>
+                        </div>
+                        <button class="btn-pastel" type="button" onclick="guardarWifiNube()">Actualizar Wi-Fi</button>
+                        <div class="feedback-msg" id="wifiFeedback"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <footer>Smart Botany | Última sincronización: <span id="lastUpdate">--</span></footer>
         </main>
     </div>
 
@@ -235,13 +290,85 @@
         function cambiarPestaña(tabName, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active-tab'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(`tab-${tabName}`).classList.add('active-tab'); element.classList.add('active');
-            if (tabName === 'camera') initWebcam(); 
+            document.getElementById(`tab-${tabName}`).classList.add('active-tab');
+            element.classList.add('active');
+
+            const titleEl = document.getElementById('tabTitle');
+            const subTitleEl = document.getElementById('tabSubtitle');
+
+            if (tabName === 'dashboard') {
+                titleEl.textContent = "DASHBOARD";
+                subTitleEl.textContent = "monitor ambiental en tiempo real";
+            } else if (tabName === 'camera') {
+                titleEl.textContent = "IA BOTÁNICA";
+                subTitleEl.textContent = "análisis y ajuste automático";
+                initWebcam(); 
+            } else if (tabName === 'settings') {
+                titleEl.textContent = "CONFIGURACIÓN";
+                subTitleEl.textContent = "parámetros de red y riego manual";
+            }
+        }
+
+        function alternarPassword() {
+            const passInput = document.getElementById('wifiPassInput');
+            passInput.type = passInput.type === 'password' ? 'text' : 'password';
         }
 
         const firebaseConfig = { databaseURL: "https://planta-iot-43aeb-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig); const database = firebase.database();
         let watchdogTimer;
+        let wifiCargadoInicialmente = false;
+
+        // Guardar Umbral Manual en Firebase
+        function guardarUmbralManual() {
+            const input = document.getElementById('manualThresholdInput');
+            const feedback = document.getElementById('thresholdFeedback');
+            const valor = Number(input.value);
+
+            if (isNaN(valor) || valor < 5 || valor > 95) {
+                feedback.style.color = "var(--danger)";
+                feedback.textContent = "⚠️ Ingresa un valor válido entre 5% y 95%.";
+                return;
+            }
+
+            database.ref('/planta/config').update({ umbral_seco: valor })
+                .then(() => {
+                    feedback.style.color = "var(--accent-green)";
+                    feedback.textContent = `✓ Umbral actualizado a ${valor}% y sincronizado con el hardware.`;
+                    setTimeout(() => feedback.textContent = "", 4000);
+                })
+                .catch(() => {
+                    feedback.style.color = "var(--danger)";
+                    feedback.textContent = "❌ Error al guardar en Firebase.";
+                });
+        }
+
+        // Guardar Credenciales Wi-Fi en Firebase
+        function guardarWifiNube() {
+            const ssid = document.getElementById('wifiSsidInput').value.trim();
+            const pass = document.getElementById('wifiPassInput').value.trim();
+            const feedback = document.getElementById('wifiFeedback');
+
+            if (!ssid) {
+                feedback.style.color = "var(--danger)";
+                feedback.textContent = "⚠️ El nombre de la red (SSID) no puede estar vacío.";
+                return;
+            }
+
+            database.ref('/planta/config').update({
+                wifi_ssid: ssid,
+                wifi_pass: pass
+            })
+            .then(() => {
+                feedback.style.color = "var(--accent-green)";
+                feedback.textContent = `✓ Red "${ssid}" guardada en la nube. El ESP8266 se reiniciará para conectarse.`;
+                setTimeout(() => feedback.textContent = "", 6000);
+            })
+            .catch(() => {
+                feedback.style.color = "var(--danger)";
+                feedback.textContent = "❌ Error al actualizar credenciales en la nube.";
+            });
+        }
 
         database.ref('/planta').on('value', (snapshot) => {
             const data = snapshot.val(); if (data) updateUI(data);
@@ -259,7 +386,23 @@
             }, 15000); 
 
             let currentDryLimit = 30;
-            if (data.config && data.config.umbral_seco !== undefined) { currentDryLimit = Number(data.config.umbral_seco); }
+            if (data.config) {
+                if (data.config.umbral_seco !== undefined) {
+                    currentDryLimit = Number(data.config.umbral_seco);
+                    const manualInput = document.getElementById('manualThresholdInput');
+                    if (document.activeElement !== manualInput) {
+                        manualInput.value = currentDryLimit;
+                    }
+                }
+                if (data.config.wifi_ssid) {
+                    document.getElementById('sidebarWifiName').textContent = data.config.wifi_ssid;
+                    if (!wifiCargadoInicialmente) {
+                        document.getElementById('wifiSsidInput').value = data.config.wifi_ssid;
+                        document.getElementById('wifiPassInput').value = data.config.wifi_pass || "";
+                        wifiCargadoInicialmente = true;
+                    }
+                }
+            }
             document.getElementById('currentThreshold').textContent = currentDryLimit;
 
             // Suelo y Avatar
@@ -300,7 +443,7 @@
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
         }
 
-        // --- CÁMARA E IA BOTÁNICA (Se mantiene igual) ---
+        // --- CÁMARA E IA BOTÁNICA ---
         let webcamStream = null;
         async function initWebcam() { if (webcamStream) return; try { webcamStream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('webcam').srcObject = webcamStream; } catch (err) {} }
         function tomarFotoYDetectar() {
