@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Humid | Smart Botany</title>
+    <title>BioCloud - Monitor IoT Botánico</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,105 +11,191 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         
-        :root {
+        /* TEMA OSCURO (Por defecto) */
+        :root, [data-theme="dark"] {
             --accent-green: #00d26a; 
             --accent-hover: #00e676;
+            --bg-overlay: linear-gradient(rgba(10, 15, 12, 0.85), rgba(10, 15, 12, 0.90));
             --bg-glass-main: rgba(10, 15, 12, 0.85); 
             --bg-glass-card: rgba(0, 0, 0, 0.65);
             --bg-glass-input: rgba(255, 255, 255, 0.05);
+            --bg-sub-box: rgba(0, 0, 0, 0.35);
             --border-glass: rgba(255, 255, 255, 0.12);
             --border-highlight: rgba(0, 210, 106, 0.4);
             --text-main: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.65);
+            --shadow-window: 0 30px 60px rgba(0, 0, 0, 0.8);
             --danger: #ff4757;
             --water: #38bdf8;
             --sun: #facc15;
         }
 
+        /* TEMA CLARO (Activado manualmente o por alta luminosidad en el sensor) */
+        [data-theme="light"] {
+            --accent-green: #00a854; 
+            --accent-hover: #00c462;
+            --bg-overlay: linear-gradient(rgba(232, 244, 236, 0.78), rgba(218, 236, 224, 0.86));
+            --bg-glass-main: rgba(255, 255, 255, 0.82); 
+            --bg-glass-card: rgba(255, 255, 255, 0.76);
+            --bg-glass-input: rgba(15, 36, 23, 0.06);
+            --bg-sub-box: rgba(15, 36, 23, 0.05);
+            --border-glass: rgba(15, 45, 25, 0.14);
+            --border-highlight: rgba(0, 168, 84, 0.45);
+            --text-main: #0f2417;
+            --text-muted: rgba(15, 36, 23, 0.68);
+            --shadow-window: 0 25px 50px rgba(15, 45, 25, 0.18);
+            --danger: #e11d48;
+            --water: #0284c7;
+            --sun: #d97706;
+        }
+
         body {
-            background-image: linear-gradient(rgba(10, 15, 12, 0.85), rgba(10, 15, 12, 0.90)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-image: var(--bg-overlay), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
             background-size: cover; background-position: center; background-attachment: fixed;
             color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 30px 20px;
+            transition: color 0.4s ease;
         }
 
         h1, h2, h3, .brand span { font-family: 'Montserrat', sans-serif; }
 
         .dashboard-window {
             background: var(--bg-glass-main); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass); border-radius: 24px; width: 100%; max-width: 1250px;
-            padding: 30px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); display: grid; grid-template-columns: 240px 1fr; gap: 35px;
+            border: 1px solid var(--border-glass); border-radius: 24px; width: 100%; max-width: 1280px;
+            padding: 30px; box-shadow: var(--shadow-window); display: grid; grid-template-columns: 240px 1fr; gap: 35px;
+            transition: background 0.6s ease, border-color 0.4s ease, box-shadow 0.6s ease;
         }
 
         sidebar { border-right: 1px solid var(--border-glass); padding-right: 25px; display: flex; flex-direction: column; justify-content: space-between; }
-        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.5em; font-weight: 800; color: var(--text-main); margin-bottom: 40px; letter-spacing: -0.5px; }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.5em; font-weight: 800; color: var(--text-main); margin-bottom: 30px; letter-spacing: -0.5px; }
         .brand-icon { color: var(--accent-green); font-size: 1.4em; text-shadow: 0 0 15px rgba(0, 210, 106, 0.4); }
+
+        .species-badge {
+            background: var(--bg-sub-box);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 25px;
+            font-size: 0.8em;
+        }
+        .species-badge-title { color: var(--text-muted); text-transform: uppercase; font-size: 0.78em; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+        .species-badge-name { color: var(--accent-green); font-weight: 700; font-size: 0.98em; }
 
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .nav-item { padding: 12px 18px; border-radius: 12px; color: var(--text-muted); font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; }
-        .nav-item.active { background: rgba(0, 210, 106, 0.1); color: var(--accent-green); border: 1px solid var(--border-highlight); }
+        .nav-item.active { background: rgba(0, 210, 106, 0.12); color: var(--accent-green); border: 1px solid var(--border-highlight); font-weight: 600; }
         .nav-item:hover:not(.active) { background: var(--bg-glass-input); color: var(--text-main); }
 
-        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 35px; border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; }
-        .header-title h1 { font-size: 2.2em; font-weight: 800; color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; }
-        .header-title p { color: var(--text-muted); font-size: 0.95em; margin-top: 8px; font-weight: 400; text-transform: lowercase; letter-spacing: 2px; }
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .header-title h1 { font-size: 2.1em; font-weight: 800; color: var(--text-main); letter-spacing: 1px; text-transform: uppercase; }
+        .header-title p { color: var(--text-muted); font-size: 0.92em; margin-top: 6px; font-weight: 400; text-transform: lowercase; letter-spacing: 2px; }
 
-        .status-pill { background: var(--accent-green); color: #000; padding: 10px 20px; border-radius: 4px; display: flex; align-items: center; gap: 10px; font-size: 0.85em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 210, 106, 0.3); transition: all 0.3s ease; }
+        .header-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+        /* Selector de Tema (Oscuro / Claro / Variable) */
+        .theme-switcher {
+            display: flex;
+            background: var(--bg-sub-box);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+        .theme-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 0.78em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .theme-btn:hover { color: var(--text-main); }
+        .theme-btn.active-theme {
+            background: var(--accent-green);
+            color: #000000;
+            box-shadow: 0 2px 10px rgba(0, 210, 106, 0.3);
+        }
+
+        .status-pill { background: var(--accent-green); color: #000; padding: 10px 18px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 0.82em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 8px 20px rgba(0, 210, 106, 0.25); transition: all 0.3s ease; }
         .status-dot-active { width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; transition: all 0.3s ease; }
 
         .tab-content { display: none; opacity: 0; transition: opacity 0.4s ease; }
         .tab-content.active-tab { display: block; opacity: 1; }
 
         .cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 25px; width: 100%; }
-        .card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 30px 25px; backdrop-filter: blur(8px); transition: transform 0.3s ease, border 0.3s ease; position: relative; overflow: hidden; }
-        .card:hover { transform: translateY(-5px); border-color: var(--border-highlight); }
-        .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-label { font-size: 0.8em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px; }
-        .card-value { font-family: 'Montserrat', sans-serif; font-size: 3em; font-weight: 700; color: var(--text-main); letter-spacing: -1px; margin-bottom: 8px; }
+        .card { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 26px 24px; backdrop-filter: blur(8px); transition: transform 0.3s ease, border-color 0.3s ease, background 0.6s ease; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+        .card:hover { transform: translateY(-4px); border-color: var(--border-highlight); }
+        .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .card-label { font-size: 0.78em; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 12px; }
+        .card-value { font-family: 'Montserrat', sans-serif; font-size: 2.8em; font-weight: 700; color: var(--text-main); letter-spacing: -1px; margin-bottom: 6px; }
         .card-value span { color: var(--accent-green); transition: color 0.3s ease; }
-        .card-sub { font-size: 0.85em; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease; }
-        .dual-val { font-size: 2.2em; display: flex; gap: 15px; }
+        .card-sub { font-size: 0.85em; font-weight: 500; color: var(--text-muted); transition: color 0.3s ease; line-height: 1.4; }
+        .dual-val { font-size: 2.2em; display: flex; gap: 15px; align-items: baseline; }
 
-        /* Avatares */
-        .plant-avatar { font-size: 2.8em; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; transition: all 0.5s ease; }
-        .reaction-text { font-size: 0.9em; font-weight: 600; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-glass); transition: color 0.3s ease; }
-        .avatar-happy { border: 1px solid rgba(0, 210, 106, 0.5); box-shadow: 0 0 20px rgba(0, 210, 106, 0.2); text-shadow: 0 0 15px rgba(0, 210, 106, 0.4); }
-        .avatar-drowning { border: 1px solid rgba(56, 189, 248, 0.5); box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        @keyframes pulse-danger { 0% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } 50% { box-shadow: 0 0 35px rgba(255, 71, 87, 0.7); transform: scale(1.05); } 100% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } }
-        .avatar-thirsty { border: 1px solid rgba(255, 71, 87, 0.8); animation: pulse-danger 1.5s infinite; text-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
+        .card-footer-info {
+            font-size: 0.84em;
+            font-weight: 600;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-glass);
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Avatares y Estados Dinámicos */
+        .plant-avatar { font-size: 2.6em; display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; flex-shrink: 0; background: var(--bg-glass-input); border-radius: 50%; transition: all 0.5s ease; }
+        .reaction-text { font-size: 0.88em; font-weight: 600; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-glass); transition: color 0.3s ease; }
+        
+        .avatar-happy { border: 1px solid rgba(0, 210, 106, 0.5); box-shadow: 0 0 20px rgba(0, 210, 106, 0.2); }
+        .avatar-drowning { border: 1px solid rgba(56, 189, 248, 0.6); box-shadow: 0 0 20px rgba(56, 189, 248, 0.25); }
+        .avatar-warning { border: 1px solid rgba(250, 204, 21, 0.6); box-shadow: 0 0 20px rgba(250, 204, 21, 0.25); }
+        
+        @keyframes pulse-danger { 0% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } 50% { box-shadow: 0 0 32px rgba(255, 71, 87, 0.65); transform: scale(1.05); } 100% { box-shadow: 0 0 15px rgba(255, 71, 87, 0.2); transform: scale(1); } }
+        .avatar-thirsty { border: 1px solid rgba(255, 71, 87, 0.8); animation: pulse-danger 1.5s infinite; }
 
         .card-full-width { grid-column: 1 / -1; padding: 25px; }
-        .chart-container { position: relative; height: 250px; width: 100%; }
+        .chart-container { position: relative; height: 240px; width: 100%; }
 
-        .ai-section { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 35px; }
+        .ai-section { background: var(--bg-glass-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 35px; transition: background 0.6s ease; }
         .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
-        .camera-box, .file-box { background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; }
-        .camera-box:hover, .file-box:hover { border-color: var(--border-highlight); background: rgba(0,0,0,0.5); }
+        .camera-box, .file-box { background: var(--bg-sub-box); border: 1px dashed var(--border-glass); border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .camera-box:hover, .file-box:hover { border-color: var(--border-highlight); }
         video { width: 100%; max-width: 280px; height: 200px; border-radius: 8px; background: #000; object-fit: cover; border: 1px solid var(--border-glass); margin-bottom: 20px; }
         
-        .btn-pastel { background: var(--accent-green); color: #000; border: none; padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 106, 0.2); transition: all 0.3s; }
-        .btn-pastel:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 6px 20px rgba(0, 210, 106, 0.4); }
-        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--accent-green); padding: 14px 28px; border-radius: 4px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; }
-        .btn-secondary:hover { background: rgba(0, 210, 106, 0.1); }
+        .btn-pastel { background: var(--accent-green); color: #000; border: none; padding: 14px 26px; border-radius: 6px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.88em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 210, 106, 0.2); transition: all 0.3s; }
+        .btn-pastel:hover { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 6px 20px rgba(0, 210, 106, 0.35); }
+        .btn-secondary { background: transparent; color: var(--text-main); border: 1px solid var(--accent-green); padding: 14px 26px; border-radius: 6px; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.88em; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; }
+        .btn-secondary:hover { background: rgba(0, 210, 106, 0.12); }
 
         /* Formularios de Configuración */
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .form-group label { font-size: 0.8em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-group label { font-size: 0.76em; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
         .input-wrapper { position: relative; display: flex; align-items: center; }
-        .form-input { width: 100%; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--border-glass); padding: 14px 16px; border-radius: 8px; color: var(--text-main); font-size: 0.95em; outline: none; transition: border 0.3s; }
+        .form-input { width: 100%; background: var(--bg-sub-box); border: 1px solid var(--border-glass); padding: 12px 14px; border-radius: 8px; color: var(--text-main); font-size: 0.95em; outline: none; transition: border 0.3s, background 0.4s; }
         .form-input:focus { border-color: var(--accent-green); }
-        .toggle-pass { position: absolute; right: 14px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1em; }
+        .toggle-pass { position: absolute; right: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1em; }
         .feedback-msg { margin-top: 12px; font-size: 0.85em; font-weight: 600; min-height: 20px; }
 
-        #plantResult { margin-top: 25px; background: rgba(0, 210, 106, 0.05); border-left: 4px solid var(--accent-green); border-radius: 0 8px 8px 0; padding: 20px; }
+        #plantResult { margin-top: 25px; background: rgba(0, 210, 106, 0.08); border-left: 4px solid var(--accent-green); border-radius: 0 8px 8px 0; padding: 20px; }
         #plantName { color: var(--accent-green); font-size: 1.5em; font-weight: 700; margin-bottom: 5px; }
         #plantScore { color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px; }
-        footer { text-align: center; color: var(--text-muted); font-size: 0.8em; font-weight: 500; margin-top: 40px; letter-spacing: 1px; }
+        footer { text-align: center; color: var(--text-muted); font-size: 0.8em; font-weight: 500; margin-top: 35px; letter-spacing: 1px; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .dashboard-window { grid-template-columns: 1fr; padding: 20px; }
-            sidebar { border-right: none; border-bottom: 1px solid var(--border-glass); padding-bottom: 25px; }
+            sidebar { border-right: none; border-bottom: 1px solid var(--border-glass); padding-bottom: 20px; }
             .cards-grid { grid-template-columns: 1fr; }
             .ai-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -119,14 +205,21 @@
         <sidebar>
             <div>
                 <div class="brand"><span class="brand-icon">🌿</span><span>nature</span></div>
+                
+                <div class="species-badge">
+                    <div class="species-badge-title">Especie Activa</div>
+                    <div class="species-badge-name" id="sidebarSpecies">Estándar / Templada</div>
+                </div>
+
                 <ul class="nav-list">
                     <li class="nav-item active" onclick="cambiarPestaña('dashboard', this)">📊 Panel General</li>
                     <li class="nav-item" onclick="cambiarPestaña('camera', this)">🔍 Inteligencia Botánica</li>
                     <li class="nav-item" onclick="cambiarPestaña('settings', this)">⚙️ Configuración</li>
                 </ul>
             </div>
-            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-                Red: <span id="sidebarWifiName" style="color: var(--accent-green);">--</span>
+            <div style="font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px;">
+                Red: <span id="sidebarWifiName" style="color: var(--accent-green);">--</span><br>
+                <span id="themeSensorHint" style="font-size: 0.85em; opacity: 0.8;">Tema: Oscuro</span>
             </div>
         </sidebar>
 
@@ -136,9 +229,19 @@
                     <p id="tabSubtitle">monitor ambiental en tiempo real</p>
                     <h1 id="tabTitle">DASHBOARD</h1>
                 </div>
-                <div class="status-pill" id="statusPillBox">
-                    <div class="status-dot-active" id="statusDot"></div>
-                    <span id="statusCloudText">Conectando...</span>
+                
+                <div class="header-controls">
+                    <!-- Selector de Modo Visual -->
+                    <div class="theme-switcher" title="Cambiar apariencia visual">
+                        <button type="button" class="theme-btn active-theme" id="btn-theme-dark" onclick="setThemeMode('dark')">🌙 Oscuro</button>
+                        <button type="button" class="theme-btn" id="btn-theme-light" onclick="setThemeMode('light')">☀️ Claro</button>
+                        <button type="button" class="theme-btn" id="btn-theme-auto" onclick="setThemeMode('auto')">🌗 Variable</button>
+                    </div>
+
+                    <div class="status-pill" id="statusPillBox">
+                        <div class="status-dot-active" id="statusDot"></div>
+                        <span id="statusCloudText">Conectando...</span>
+                    </div>
                 </div>
             </header>
 
@@ -146,11 +249,11 @@
             <div id="tab-dashboard" class="tab-content active-tab">
                 <div class="cards-grid">
                     
-                    <!-- 1. Suelo -->
+                    <!-- 1. Suelo + Avatar Integral -->
                     <div class="card">
                         <div class="card-header-flex">
                             <div>
-                                <div class="card-label">Sustrato (A0)</div>
+                                <div class="card-label">Sustrato (A0) • Mín. <span id="currentThreshold">30</span>%</div>
                                 <div class="card-value"><span id="humidity">--</span>%</div>
                                 <div class="card-sub" id="soilStatus">Esperando datos...</div>
                             </div>
@@ -159,29 +262,46 @@
                         <div class="reaction-text" id="reactionText">Iniciando sistema vital...</div>
                     </div>
 
-                    <!-- 2. Luz BH1750 -->
+                    <!-- 2. Luz BH1750 + Diagnóstico Botánico -->
                     <div class="card">
-                        <div class="card-label">Luz Ambiental (I2C)</div>
-                        <div class="card-value"><span style="color: var(--sun);" id="lightLux">--</span> lx</div>
-                        <div class="card-sub" id="lightStatus" style="margin-top: 10px;">Analizando exposición...</div>
-                    </div>
-
-                    <!-- 3. Microclima DHT22 -->
-                    <div class="card">
-                        <div class="card-label">Clima Ambiental (D4)</div>
-                        <div class="card-value dual-val">
-                            <div><span style="color: var(--danger);" id="airTemp">--</span><span style="font-size: 0.5em;">°C</span></div>
-                            <div style="color: var(--border-glass);">|</div>
-                            <div><span style="color: var(--water);" id="airHum">--</span><span style="font-size: 0.5em;">%</span></div>
+                        <div>
+                            <div class="card-label">Luz Ambiental (BH1750)</div>
+                            <div class="card-value"><span style="color: var(--sun);" id="lightLux">--</span> lx</div>
+                            <div class="card-sub" id="lightStatus">Analizando exposición...</div>
                         </div>
-                        <div class="card-sub" style="margin-top: 10px;">Sensación Térmica: <span id="heatIndex" style="color: #fff; font-weight: 700;">--</span> °C</div>
+                        <div class="card-footer-info">
+                            <span>☀️ Luz útil hoy: <strong id="effectiveLightHours" style="color: var(--text-main);">0.0</strong> / <span id="targetLightHours">5</span> h</span>
+                            <span id="idealLightRange" style="font-size: 0.9em;">2k–15k lx</span>
+                        </div>
                     </div>
 
-                    <!-- 4. Umbral Botánico -->
+                    <!-- 3. Microclima DHT22 + Diagnóstico Térmico -->
                     <div class="card">
-                        <div class="card-label">Umbral Mínimo Activo</div>
-                        <div class="card-value" style="font-size: 2.5em; padding-top: 10px;"><span id="currentThreshold">30</span>%</div>
-                        <div class="card-sub" style="margin-top: 10px;">Ajustable por IA o manualmente</div>
+                        <div>
+                            <div class="card-label">Clima Ambiental (DHT22)</div>
+                            <div class="card-value dual-val">
+                                <div><span style="color: var(--danger);" id="airTemp">--</span><span style="font-size: 0.5em;">°C</span></div>
+                                <div style="color: var(--border-glass);">|</div>
+                                <div><span style="color: var(--water);" id="airHum">--</span><span style="font-size: 0.5em;">%</span></div>
+                            </div>
+                            <div class="card-sub" id="climateDiagnosis">Sensación Térmica: <span id="heatIndex" style="color: var(--text-main); font-weight: 700;">--</span> °C</div>
+                        </div>
+                        <div class="card-footer-info">
+                            <span>🌡️ Ideal: <strong id="idealTempRange" style="color: var(--text-main);">14–32 °C</strong></span>
+                            <span>💧 Aire mín: <strong id="idealAirHum" style="color: var(--text-main);">35%</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Resumen de Perfil Botánico Activo -->
+                    <div class="card">
+                        <div>
+                            <div class="card-label">Perfil Botánico Activo</div>
+                            <div class="card-value" style="font-size: 1.75em; padding-top: 6px; line-height: 1.2;" id="activeProfileTitle">Estándar / Templada</div>
+                            <div class="card-sub" style="margin-top: 8px;" id="activeProfileNote">Sincronizado con la IA y ajustes manuales</div>
+                        </div>
+                        <div class="card-footer-info">
+                            <span>Sensación térmica actual: <strong id="heatIndexFooter" style="color: var(--text-main);">-- °C</strong></span>
+                        </div>
                     </div>
 
                     <!-- Gráfico -->
@@ -195,13 +315,13 @@
             <!-- PESTAÑA 2: RECONOCIMIENTO BOTÁNICO -->
             <div id="tab-camera" class="tab-content">
                 <div class="ai-section">
-                    <h2 style="margin-bottom: 8px;">Reconocimiento y Ajuste Autónomo</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Captura una imagen. El sistema identificará la especie y ajustará automáticamente los requerimientos en el hardware.</p>
+                    <h2 style="margin-bottom: 8px;">Reconocimiento y Ajuste Multivariable</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 20px;">Captura una imagen. La IA identificará la especie y calibrará automáticamente los umbrales de suelo, luz y temperatura en la nube.</p>
                     <div class="ai-grid">
                         <div class="camera-box">
                             <video id="webcam" autoplay playsinline></video>
                             <canvas id="canvas" style="display: none;"></canvas>
-                            <button class="btn-pastel" type="button" onclick="tomarFotoYDetectar()">Escanear</button>
+                            <button class="btn-pastel" type="button" onclick="tomarFotoYDetectar()">Escanear Planta</button>
                         </div>
                         <div class="file-box">
                             <p style="color: var(--text-muted); margin-bottom: 25px; font-weight: 500;">O selecciona desde el dispositivo</p>
@@ -211,71 +331,161 @@
                         </div>
                     </div>
                     <div id="plantResult" style="display: none;">
-                        <h3 id="plantName">--</h3><p id="plantScore"></p><p id="plantDetails" style="font-size: 0.95em; color: var(--text-main); line-height: 1.6;"></p>
+                        <h3 id="plantName">--</h3>
+                        <p id="plantScore"></p>
+                        <div id="plantDetails" style="font-size: 0.95em; color: var(--text-main); line-height: 1.6;"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 3: CONFIGURACIÓN MANUAL (UMBRAL + WIFI EN LA NUBE) -->
+            <!-- PESTAÑA 3: CONFIGURACIÓN MANUAL (PARÁMETROS + WIFI + TEMA) -->
             <div id="tab-settings" class="tab-content">
                 <div class="cards-grid">
                     
-                    <!-- Tarjeta A: Control Manual de Humedad -->
+                    <!-- Tarjeta A: Control Manual de Parámetros Botánicos -->
                     <div class="card">
-                        <h2 style="margin-bottom: 8px; font-size: 1.3em;">💧 Umbral de Humedad Mínimo</h2>
-                        <p style="color: var(--text-muted); font-size: 0.88em; margin-bottom: 22px; line-height: 1.5;">
-                            Define manualmente el porcentaje mínimo antes de enviar la alerta a WhatsApp. Sobrescribe el valor de la IA.
-                        </p>
-                        <div class="form-group">
-                            <label for="manualThresholdInput">Porcentaje Mínimo de Alerta (5% - 95%)</label>
-                            <input type="number" id="manualThresholdInput" class="form-input" min="5" max="95" value="30">
+                        <div>
+                            <h2 style="margin-bottom: 8px; font-size: 1.25em;">🌱 Parámetros Botánicos Manuales</h2>
+                            <p style="color: var(--text-muted); font-size: 0.86em; margin-bottom: 18px; line-height: 1.5;">
+                                Ajusta manualmente los umbrales si deseas personalizar los límites calculados por la IA.
+                            </p>
+                            <div class="form-group">
+                                <label for="manualThresholdInput">Humedad Mínima del Suelo (5% - 95%)</label>
+                                <input type="number" id="manualThresholdInput" class="form-input" min="5" max="95" value="30">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualLuzMinInput">Luz Mínima Ideal (lx)</label>
+                                    <input type="number" id="manualLuzMinInput" class="form-input" min="50" max="50000" value="2000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualLuzMaxInput">Luz Máxima Ideal (lx)</label>
+                                    <input type="number" id="manualLuzMaxInput" class="form-input" min="500" max="100000" value="15000">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="manualTempMinInput">Temp. Mínima (°C)</label>
+                                    <input type="number" id="manualTempMinInput" class="form-input" min="-5" max="35" value="14">
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualTempMaxInput">Temp. Máxima (°C)</label>
+                                    <input type="number" id="manualTempMaxInput" class="form-input" min="15" max="50" value="32">
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn-pastel" type="button" onclick="guardarUmbralManual()">Guardar Umbral</button>
-                        <div class="feedback-msg" id="thresholdFeedback"></div>
+                        <div>
+                            <button class="btn-pastel" type="button" onclick="guardarParametrosManuales()">Guardar Parámetros</button>
+                            <div class="feedback-msg" id="thresholdFeedback"></div>
+                        </div>
                     </div>
 
                     <!-- Tarjeta B: Credenciales Wi-Fi en la Nube -->
                     <div class="card">
-                        <h2 style="margin-bottom: 8px; font-size: 1.3em;">📡 Conexión Wi-Fi del Monitor</h2>
-                        <p style="color: var(--text-muted); font-size: 0.88em; margin-bottom: 22px; line-height: 1.5;">
-                            Guarda una nueva red Wi-Fi (2.4 GHz) en la nube. El microcontrolador la leerá, la almacenará en su memoria interna y se reconectará.
-                        </p>
-                        <div class="form-group">
-                            <label for="wifiSsidInput">Nombre de la Red (SSID)</label>
-                            <input type="text" id="wifiSsidInput" class="form-input" placeholder="Ej: MiWiFi_Casa">
-                        </div>
-                        <div class="form-group">
-                            <label for="wifiPassInput">Contraseña del Wi-Fi</label>
-                            <div class="input-wrapper">
-                                <input type="password" id="wifiPassInput" class="form-input" placeholder="Ingresa la contraseña">
-                                <button type="button" class="toggle-pass" onclick="alternarPassword()">👁️</button>
+                        <div>
+                            <h2 style="margin-bottom: 8px; font-size: 1.25em;">📡 Conexión Wi-Fi del Monitor</h2>
+                            <p style="color: var(--text-muted); font-size: 0.86em; margin-bottom: 18px; line-height: 1.5;">
+                                Guarda una nueva red Wi-Fi (2.4 GHz) en la nube. El ESP8266 la leerá, la almacenará en su memoria interna y se reconectará.
+                            </p>
+                            <div class="form-group">
+                                <label for="wifiSsidInput">Nombre de la Red (SSID)</label>
+                                <input type="text" id="wifiSsidInput" class="form-input" placeholder="Ej: MiWiFi_Casa">
+                            </div>
+                            <div class="form-group">
+                                <label for="wifiPassInput">Contraseña del Wi-Fi</label>
+                                <div class="input-wrapper">
+                                    <input type="password" id="wifiPassInput" class="form-input" placeholder="Ingresa la contraseña">
+                                    <button type="button" class="toggle-pass" onclick="alternarPassword()">👁️</button>
+                                </div>
                             </div>
                         </div>
-                        <button class="btn-pastel" type="button" onclick="guardarWifiNube()">Actualizar Wi-Fi</button>
-                        <div class="feedback-msg" id="wifiFeedback"></div>
+                        <div>
+                            <button class="btn-pastel" type="button" onclick="guardarWifiNube()">Actualizar Wi-Fi</button>
+                            <div class="feedback-msg" id="wifiFeedback"></div>
+                        </div>
                     </div>
 
                 </div>
             </div>
 
-            <footer>Smart Botany | Última sincronización: <span id="lastUpdate">--</span></footer>
+            <footer>BioCloud Dashboard | Última sincronización: <span id="lastUpdate">--</span></footer>
         </main>
     </div>
 
     <script>
         const KINDWISE_API_KEY = "r6MGhn4aM8v9qvQSf9VIJ5wqAyjoALmuOjmOF6GWRNjQYEtQq8";
-        
+
+        // ============ GESTIÓN DE TEMA (OSCURO / CLARO / VARIABLE POR SENSOR) ============
+        let themeMode = localStorage.getItem('biocloud_theme_mode') || 'dark';
+        let currentAppliedTheme = 'dark';
+        let latestLux = null;
+
+        function applyVisualTheme(targetTheme, reasonText) {
+            currentAppliedTheme = targetTheme;
+            document.documentElement.setAttribute('data-theme', targetTheme);
+            document.getElementById('themeSensorHint').textContent = reasonText;
+
+            // Actualizar colores de ejes de Chart.js según contraste del tema
+            if (humidityChart) {
+                const tickColor = targetTheme === 'light' ? 'rgba(15, 36, 23, 0.65)' : 'rgba(255, 255, 255, 0.55)';
+                const gridColor = targetTheme === 'light' ? 'rgba(15, 36, 23, 0.08)' : 'rgba(255, 255, 255, 0.06)';
+                const lineColor = targetTheme === 'light' ? '#00a854' : '#00d26a';
+                humidityChart.data.datasets[0].borderColor = lineColor;
+                humidityChart.data.datasets[0].pointBackgroundColor = lineColor;
+                humidityChart.options.scales.y.ticks.color = tickColor;
+                humidityChart.options.scales.x.ticks.color = tickColor;
+                humidityChart.options.scales.y.grid.color = gridColor;
+                humidityChart.update('none');
+            }
+        }
+
+        function evaluateVariableTheme(lux) {
+            if (themeMode !== 'auto') return;
+            if (lux === null || isNaN(lux)) {
+                applyVisualTheme('dark', 'Variable (esperando lux)');
+                return;
+            }
+            // Histéresis entre 150 lx y 250 lx para evitar cambios bruscos si oscila la luz
+            if (lux >= 250) {
+                applyVisualTheme('light', `Variable: Claro (${Math.round(lux)} lx)`);
+            } else if (lux < 150) {
+                applyVisualTheme('dark', `Variable: Oscuro (${Math.round(lux)} lx)`);
+            } else {
+                const label = currentAppliedTheme === 'light' ? 'Claro' : 'Oscuro';
+                applyVisualTheme(currentAppliedTheme, `Variable: ${label} (${Math.round(lux)} lx)`);
+            }
+        }
+
+        function setThemeMode(mode) {
+            themeMode = mode;
+            localStorage.setItem('biocloud_theme_mode', mode);
+
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active-theme'));
+            const activeBtn = document.getElementById(`btn-theme-${mode}`);
+            if (activeBtn) activeBtn.classList.add('active-theme');
+
+            if (mode === 'dark') {
+                applyVisualTheme('dark', 'Tema: Oscuro fijo');
+            } else if (mode === 'light') {
+                applyVisualTheme('light', 'Tema: Claro fijo');
+            } else if (mode === 'auto') {
+                evaluateVariableTheme(latestLux);
+            }
+        }
+
+        // ============ GRÁFICO DE TENDENCIA (Chart.js) ============
         let humidityChart; const maxDataPoints = 30; const chartLabels = []; const chartData = [];
 
         function initChart() {
             const ctx = document.getElementById('humidityChart').getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-            gradient.addColorStop(0, 'rgba(0, 210, 106, 0.4)'); gradient.addColorStop(1, 'rgba(0, 210, 106, 0)');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+            gradient.addColorStop(0, 'rgba(0, 210, 106, 0.35)'); gradient.addColorStop(1, 'rgba(0, 210, 106, 0)');
             humidityChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: chartLabels, datasets: [{ data: chartData, borderColor: '#00d26a', backgroundColor: gradient, borderWidth: 2, fill: true, tension: 0.4, pointBackgroundColor: '#00d26a', pointRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.5)' } } }, plugins: { legend: { display: false } } }
+                data: { labels: chartLabels, datasets: [{ data: chartData, borderColor: '#00d26a', backgroundColor: gradient, borderWidth: 2.5, fill: true, tension: 0.4, pointBackgroundColor: '#00d26a', pointRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100, grid: { color: 'rgba(255, 255, 255, 0.06)' }, ticks: { color: 'rgba(255, 255, 255, 0.55)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.55)' } } }, plugins: { legend: { display: false } } }
             });
+            setThemeMode(themeMode);
         }
 
         function updateChartData(newHumidity) {
@@ -301,11 +511,11 @@
                 subTitleEl.textContent = "monitor ambiental en tiempo real";
             } else if (tabName === 'camera') {
                 titleEl.textContent = "IA BOTÁNICA";
-                subTitleEl.textContent = "análisis y ajuste automático";
+                subTitleEl.textContent = "análisis y ajuste multivariable";
                 initWebcam(); 
             } else if (tabName === 'settings') {
                 titleEl.textContent = "CONFIGURACIÓN";
-                subTitleEl.textContent = "parámetros de red y riego manual";
+                subTitleEl.textContent = "parámetros de red y rangos manuales";
             }
         }
 
@@ -314,36 +524,49 @@
             passInput.type = passInput.type === 'password' ? 'text' : 'password';
         }
 
+        // ============ FIREBASE Y ESTADO AMBIENTAL ============
         const firebaseConfig = { databaseURL: "https://planta-iot-43aeb-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig); const database = firebase.database();
         let watchdogTimer;
         let wifiCargadoInicialmente = false;
 
-        // Guardar Umbral Manual en Firebase
-        function guardarUmbralManual() {
-            const input = document.getElementById('manualThresholdInput');
-            const feedback = document.getElementById('thresholdFeedback');
-            const valor = Number(input.value);
+        // Respaldo local de minutos de luz útil por si aún no se actualiza el firmware
+        let localEffectiveSeconds = 0;
+        let lastPacketTimestamp = null;
 
-            if (isNaN(valor) || valor < 5 || valor > 95) {
+        function guardarParametrosManuales() {
+            const humMin = Number(document.getElementById('manualThresholdInput').value);
+            const luzMin = Number(document.getElementById('manualLuzMinInput').value);
+            const luzMax = Number(document.getElementById('manualLuzMaxInput').value);
+            const tempMin = Number(document.getElementById('manualTempMinInput').value);
+            const tempMax = Number(document.getElementById('manualTempMaxInput').value);
+            const feedback = document.getElementById('thresholdFeedback');
+
+            if (isNaN(humMin) || humMin < 5 || humMin > 95 || luzMin >= luzMax || tempMin >= tempMax) {
                 feedback.style.color = "var(--danger)";
-                feedback.textContent = "⚠️ Ingresa un valor válido entre 5% y 95%.";
+                feedback.textContent = "⚠️ Verifica que los valores mínimos sean menores a los máximos.";
                 return;
             }
 
-            database.ref('/planta/config').update({ umbral_seco: valor })
-                .then(() => {
-                    feedback.style.color = "var(--accent-green)";
-                    feedback.textContent = `✓ Umbral actualizado a ${valor}% y sincronizado con el hardware.`;
-                    setTimeout(() => feedback.textContent = "", 4000);
-                })
-                .catch(() => {
-                    feedback.style.color = "var(--danger)";
-                    feedback.textContent = "❌ Error al guardar en Firebase.";
-                });
+            database.ref('/planta/config').update({
+                umbral_seco: humMin,
+                luz_min: luzMin,
+                luz_max: luzMax,
+                temp_min: tempMin,
+                temp_max: tempMax,
+                perfil_tipo: "Personalizado (Manual)"
+            })
+            .then(() => {
+                feedback.style.color = "var(--accent-green)";
+                feedback.textContent = "✓ Parámetros ambientales guardados y sincronizados.";
+                setTimeout(() => feedback.textContent = "", 4000);
+            })
+            .catch(() => {
+                feedback.style.color = "var(--danger)";
+                feedback.textContent = "❌ Error al guardar en Firebase.";
+            });
         }
 
-        // Guardar Credenciales Wi-Fi en Firebase
         function guardarWifiNube() {
             const ssid = document.getElementById('wifiSsidInput').value.trim();
             const pass = document.getElementById('wifiPassInput').value.trim();
@@ -355,24 +578,25 @@
                 return;
             }
 
-            database.ref('/planta/config').update({
-                wifi_ssid: ssid,
-                wifi_pass: pass
-            })
-            .then(() => {
-                feedback.style.color = "var(--accent-green)";
-                feedback.textContent = `✓ Red "${ssid}" guardada en la nube. El ESP8266 se reiniciará para conectarse.`;
-                setTimeout(() => feedback.textContent = "", 6000);
-            })
-            .catch(() => {
-                feedback.style.color = "var(--danger)";
-                feedback.textContent = "❌ Error al actualizar credenciales en la nube.";
-            });
+            database.ref('/planta/config').update({ wifi_ssid: ssid, wifi_pass: pass })
+                .then(() => {
+                    feedback.style.color = "var(--accent-green)";
+                    feedback.textContent = `✓ Red "${ssid}" guardada. El ESP8266 se reiniciará para conectarse.`;
+                    setTimeout(() => feedback.textContent = "", 6000);
+                })
+                .catch(() => {
+                    feedback.style.color = "var(--danger)";
+                    feedback.textContent = "❌ Error al actualizar credenciales en la nube.";
+                });
         }
 
         database.ref('/planta').on('value', (snapshot) => {
             const data = snapshot.val(); if (data) updateUI(data);
         });
+
+        function formatLuxShort(val) {
+            return val >= 1000 ? (val / 1000).toFixed(1).replace('.0', '') + 'k' : val;
+        }
 
         function updateUI(data) {
             const statusIndicator = document.getElementById('statusCloudText');
@@ -385,65 +609,182 @@
                 statusIndicator.textContent = "Offline"; statusPillBox.style.background = "transparent"; statusPillBox.style.border = "1px solid var(--danger)"; statusPillBox.style.color = "var(--danger)"; statusDot.style.background = "var(--danger)";
             }, 15000); 
 
-            let currentDryLimit = 30;
-            if (data.config) {
-                if (data.config.umbral_seco !== undefined) {
-                    currentDryLimit = Number(data.config.umbral_seco);
-                    const manualInput = document.getElementById('manualThresholdInput');
-                    if (document.activeElement !== manualInput) {
-                        manualInput.value = currentDryLimit;
-                    }
-                }
-                if (data.config.wifi_ssid) {
-                    document.getElementById('sidebarWifiName').textContent = data.config.wifi_ssid;
-                    if (!wifiCargadoInicialmente) {
-                        document.getElementById('wifiSsidInput').value = data.config.wifi_ssid;
-                        document.getElementById('wifiPassInput').value = data.config.wifi_pass || "";
-                        wifiCargadoInicialmente = true;
-                    }
-                }
-            }
+            // 1. Cargar rangos ideales desde Firebase (con valores estándar por defecto)
+            const cfg = data.config || {};
+            const currentDryLimit = cfg.umbral_seco !== undefined ? Number(cfg.umbral_seco) : 30;
+            const luzMin = cfg.luz_min !== undefined ? Number(cfg.luz_min) : 2000;
+            const luzMax = cfg.luz_max !== undefined ? Number(cfg.luz_max) : 15000;
+            const tempMin = cfg.temp_min !== undefined ? Number(cfg.temp_min) : 14;
+            const tempMax = cfg.temp_max !== undefined ? Number(cfg.temp_max) : 32;
+            const aireMin = cfg.aire_min !== undefined ? Number(cfg.aire_min) : 35;
+            const horasLuzObj = cfg.horas_luz_obj !== undefined ? Number(cfg.horas_luz_obj) : 5;
+            const perfilTipo = cfg.perfil_tipo || "Estándar / Templada";
+            const especieNombre = cfg.especie || perfilTipo;
+
+            // Actualizar etiquetas de perfil y formulario si no están enfocados
             document.getElementById('currentThreshold').textContent = currentDryLimit;
+            document.getElementById('sidebarSpecies').textContent = especieNombre;
+            document.getElementById('activeProfileTitle').textContent = especieNombre;
+            document.getElementById('activeProfileNote').textContent = `Perfil: ${perfilTipo}`;
+            document.getElementById('idealLightRange').textContent = `${formatLuxShort(luzMin)}–${formatLuxShort(luzMax)} lx`;
+            document.getElementById('targetLightHours').textContent = horasLuzObj;
+            document.getElementById('idealTempRange').textContent = `${tempMin}–${tempMax} °C`;
+            document.getElementById('idealAirHum').textContent = `${aireMin}%`;
 
-            // Suelo y Avatar
-            if (data.humidity !== undefined) {
-                const hum = Number(data.humidity);
-                const humEl = document.getElementById('humidity'); const statusLabel = document.getElementById('soilStatus');
-                const avatar = document.getElementById('plantAvatar'); const reactionText = document.getElementById('reactionText');
-                humEl.textContent = hum.toFixed(1); updateChartData(hum);
-                
-                if (hum < currentDryLimit) {
-                    humEl.style.color = "var(--danger)"; statusLabel.innerHTML = "Estado: Crítico (Regar)"; statusLabel.style.color = "var(--danger)";
-                    avatar.innerHTML = "🥀"; avatar.className = "plant-avatar avatar-thirsty"; reactionText.innerHTML = "¡Por favor, necesito agua urgente!"; reactionText.style.color = "var(--danger)";
-                } else if (hum <= (currentDryLimit + 45)) { 
-                    humEl.style.color = "var(--accent-green)"; statusLabel.innerHTML = "Estado: Óptimo"; statusLabel.style.color = "var(--accent-green)";
-                    avatar.innerHTML = "🌿"; avatar.className = "plant-avatar avatar-happy"; reactionText.innerHTML = "¡Me siento fresca y saludable!"; reactionText.style.color = "var(--accent-green)";
-                } else {
-                    humEl.style.color = "var(--water)"; statusLabel.innerHTML = "Estado: Saturado"; statusLabel.style.color = "var(--water)";
-                    avatar.innerHTML = "💧"; avatar.className = "plant-avatar avatar-drowning"; reactionText.innerHTML = "¡Glup! Hay demasiada agua en la tierra."; reactionText.style.color = "var(--water)";
+            if (document.activeElement !== document.getElementById('manualThresholdInput')) document.getElementById('manualThresholdInput').value = currentDryLimit;
+            if (document.activeElement !== document.getElementById('manualLuzMinInput')) document.getElementById('manualLuzMinInput').value = luzMin;
+            if (document.activeElement !== document.getElementById('manualLuzMaxInput')) document.getElementById('manualLuzMaxInput').value = luzMax;
+            if (document.activeElement !== document.getElementById('manualTempMinInput')) document.getElementById('manualTempMinInput').value = tempMin;
+            if (document.activeElement !== document.getElementById('manualTempMaxInput')) document.getElementById('manualTempMaxInput').value = tempMax;
+
+            if (cfg.wifi_ssid) {
+                document.getElementById('sidebarWifiName').textContent = cfg.wifi_ssid;
+                if (!wifiCargadoInicialmente) {
+                    document.getElementById('wifiSsidInput').value = cfg.wifi_ssid;
+                    document.getElementById('wifiPassInput').value = cfg.wifi_pass || "";
+                    wifiCargadoInicialmente = true;
                 }
             }
 
-            // Luz BH1750
-            if (data.light !== undefined) {
-                const lux = Number(data.light);
+            // 2. Leer valores de sensores actuales
+            const hum = data.humidity !== undefined ? Number(data.humidity) : null;
+            const lux = data.light !== undefined ? Number(data.light) : null;
+            const temp = data.temperature !== undefined ? Number(data.temperature) : null;
+            const airHum = data.air_humidity !== undefined ? Number(data.air_humidity) : null;
+            const heatIndex = data.heat_index !== undefined ? Number(data.heat_index) : null;
+
+            // 3. Actualizar Suelo y Gráfico
+            if (hum !== null) {
+                const humEl = document.getElementById('humidity');
+                const statusLabel = document.getElementById('soilStatus');
+                humEl.textContent = hum.toFixed(1);
+                updateChartData(hum);
+
+                if (hum < currentDryLimit) {
+                    humEl.style.color = "var(--danger)";
+                    statusLabel.textContent = "Estado: Crítico (Regar)";
+                    statusLabel.style.color = "var(--danger)";
+                } else if (hum <= (currentDryLimit + 45)) {
+                    humEl.style.color = "var(--accent-green)";
+                    statusLabel.textContent = "Estado: Óptimo";
+                    statusLabel.style.color = "var(--accent-green)";
+                } else {
+                    humEl.style.color = "var(--water)";
+                    statusLabel.textContent = "Estado: Saturado";
+                    statusLabel.style.color = "var(--water)";
+                }
+            }
+
+            // 4. Actualizar Luz BH1750 + Tema Variable + Diagnóstico Contextual + Luz Útil
+            if (lux !== null) {
+                latestLux = lux;
+                evaluateVariableTheme(lux);
+
                 document.getElementById('lightLux').textContent = lux.toFixed(0);
                 const lStatus = document.getElementById('lightStatus');
-                if (lux < 50) lStatus.textContent = "Sombra profunda / Noche";
-                else if (lux < 500) lStatus.textContent = "Luz de interior suave";
-                else if (lux < 5000) lStatus.textContent = "Luz indirecta brillante";
-                else lStatus.textContent = "Exposición solar directa";
+
+                if (lux < 30) {
+                    lStatus.textContent = "🌙 Noche / Descanso fotosintético";
+                    lStatus.style.color = "var(--text-muted)";
+                } else if (lux < luzMin) {
+                    lStatus.textContent = `⚠️ Luz baja para esta especie (< ${luzMin} lx)`;
+                    lStatus.style.color = "var(--sun)";
+                } else if (lux > luzMax) {
+                    lStatus.textContent = `🔥 Exceso de sol directo (riesgo de quemadura)`;
+                    lStatus.style.color = "var(--danger)";
+                } else {
+                    lStatus.textContent = "✅ Intensidad lumínica ideal para la especie";
+                    lStatus.style.color = "var(--accent-green)";
+                }
+
+                // Horas de luz efectiva (desde Firebase si el firmware lo envía, o acumulado en sesión)
+                if (data.luz_util_min !== undefined) {
+                    const horas = Number(data.luz_util_min) / 60;
+                    document.getElementById('effectiveLightHours').textContent = horas.toFixed(1);
+                } else {
+                    const nowMs = Date.now();
+                    if (lastPacketTimestamp && lux >= luzMin) {
+                        const deltaSec = Math.min((nowMs - lastPacketTimestamp) / 1000, 30);
+                        localEffectiveSeconds += deltaSec;
+                    }
+                    lastPacketTimestamp = nowMs;
+                    document.getElementById('effectiveLightHours').textContent = (localEffectiveSeconds / 3600).toFixed(2);
+                }
             }
 
-            // Microclima DHT22
-            if (data.temperature !== undefined) document.getElementById('airTemp').textContent = Number(data.temperature).toFixed(1);
-            if (data.air_humidity !== undefined) document.getElementById('airHum').textContent = Number(data.air_humidity).toFixed(1);
-            if (data.heat_index !== undefined) document.getElementById('heatIndex').textContent = Number(data.heat_index).toFixed(1);
+            // 5. Actualizar Microclima DHT22 + Diagnóstico Térmico
+            if (temp !== null) document.getElementById('airTemp').textContent = temp.toFixed(1);
+            if (airHum !== null) document.getElementById('airHum').textContent = airHum.toFixed(1);
+            if (heatIndex !== null) {
+                document.getElementById('heatIndex').textContent = heatIndex.toFixed(1);
+                document.getElementById('heatIndexFooter').textContent = `${heatIndex.toFixed(1)} °C`;
+            }
+
+            const climateDiag = document.getElementById('climateDiagnosis');
+            if (temp !== null && temp < tempMin) {
+                climateDiag.innerHTML = `❄️ Alerta frío (< ${tempMin}°C) • ST: <strong>${heatIndex !== null ? heatIndex.toFixed(1) : '--'}°C</strong>`;
+                climateDiag.style.color = "var(--water)";
+            } else if (temp !== null && temp > tempMax) {
+                climateDiag.innerHTML = `🌡️ Estrés térmico (> ${tempMax}°C) • ST: <strong>${heatIndex !== null ? heatIndex.toFixed(1) : '--'}°C</strong>`;
+                climateDiag.style.color = "var(--danger)";
+            } else if (airHum !== null && airHum < aireMin) {
+                climateDiag.innerHTML = `💨 Aire seco (< ${aireMin}%): pulverizar hojas`;
+                climateDiag.style.color = "var(--sun)";
+            } else {
+                climateDiag.innerHTML = `✅ Microclima ideal • ST: <strong style="color: var(--text-main);">${heatIndex !== null ? heatIndex.toFixed(1) : '--'} °C</strong>`;
+                climateDiag.style.color = "var(--accent-green)";
+            }
+
+            // 6. Avatar Botánico Integral (Prioriza emergencias térmicas, luego riego, luego luz/aire)
+            const avatar = document.getElementById('plantAvatar');
+            const reactionText = document.getElementById('reactionText');
+
+            if (temp !== null && temp < tempMin) {
+                avatar.innerHTML = "🥶";
+                avatar.className = "plant-avatar avatar-drowning";
+                reactionText.textContent = `¡Hace mucho frío (${temp.toFixed(1)}°C)! Aléjame de corrientes.`;
+                reactionText.style.color = "var(--water)";
+            } else if (temp !== null && temp > tempMax) {
+                avatar.innerHTML = "🥵";
+                avatar.className = "plant-avatar avatar-thirsty";
+                reactionText.textContent = `¡Demasiado calor (${temp.toFixed(1)}°C)! Necesito un lugar más fresco.`;
+                reactionText.style.color = "var(--danger)";
+            } else if (hum !== null && hum < currentDryLimit) {
+                avatar.innerHTML = "🥀";
+                avatar.className = "plant-avatar avatar-thirsty";
+                reactionText.textContent = "¡Por favor, necesito agua urgente!";
+                reactionText.style.color = "var(--danger)";
+            } else if (hum !== null && hum > (currentDryLimit + 45)) {
+                avatar.innerHTML = "💧";
+                avatar.className = "plant-avatar avatar-drowning";
+                reactionText.textContent = "¡Glup! Hay demasiada agua en la tierra.";
+                reactionText.style.color = "var(--water)";
+            } else if (lux !== null && lux > luzMax) {
+                avatar.innerHTML = "😎";
+                avatar.className = "plant-avatar avatar-warning";
+                reactionText.textContent = "¡Sol muy fuerte! Mis hojas pueden quemarse.";
+                reactionText.style.color = "var(--sun)";
+            } else if (lux !== null && lux >= 30 && lux < luzMin) {
+                avatar.innerHTML = "🌥️";
+                avatar.className = "plant-avatar avatar-warning";
+                reactionText.textContent = "Me falta luz para hacer bien la fotosíntesis.";
+                reactionText.style.color = "var(--sun)";
+            } else if (airHum !== null && airHum < aireMin) {
+                avatar.innerHTML = "🌬️";
+                avatar.className = "plant-avatar avatar-warning";
+                reactionText.textContent = "El aire está seco, agradecería un poco de rocío.";
+                reactionText.style.color = "var(--sun)";
+            } else {
+                avatar.innerHTML = "🌿";
+                avatar.className = "plant-avatar avatar-happy";
+                reactionText.textContent = "¡Suelo, luz y temperatura en equilibrio perfecto!";
+                reactionText.style.color = "var(--accent-green)";
+            }
 
             document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-ES');
         }
 
-        // --- CÁMARA E IA BOTÁNICA ---
+        // ============ CÁMARA E IA BOTÁNICA MULTIVARIABLE ============
         let webcamStream = null;
         async function initWebcam() { if (webcamStream) return; try { webcamStream = await navigator.mediaDevices.getUserMedia({ video: true }); document.getElementById('webcam').srcObject = webcamStream; } catch (err) {} }
         function tomarFotoYDetectar() {
@@ -458,29 +799,105 @@
             const file = event.target.files[0];
             if (file) { document.getElementById('previewImage').src = URL.createObjectURL(file); document.getElementById('previewImage').style.display = 'block'; enviarAPlantNet(file); }
         }
+
         function asignarPerfilBotanico(nombresCombinados) {
             const t = nombresCombinados.toLowerCase();
-            if (/cactus|succulent|aloe|echeveria|sansevieria|cactaceae|crassula|sedum|agave|euphorbia|zamioculcas|haworthia|lithops|sempervivum|aeonium|portulacaria|opuntia|mammillaria|kalanchoe|schlumbergera/i.test(t)) return { tipo: "Desértica / Suculenta", umbralIdeal: 15 };
-            else if (/fern|calathea|monstera|spathiphyllum|fittonia|araceae|maranta|alocasia|philodendron|epipremnum|syngonium|anthurium|ficus|begonia|asplenium|nephrolepis|croton|aglaonema|caladium|tradescantia|peperomia|dieffenbachia|chlorophytum|mint|helecho/i.test(t)) return { tipo: "Tropical / Alta Humedad", umbralIdeal: 45 };
-            else return { tipo: "Estándar / Templada", umbralIdeal: 30 };
+            if (/cactus|succulent|aloe|echeveria|sansevieria|cactaceae|crassula|sedum|agave|euphorbia|zamioculcas|haworthia|lithops|sempervivum|aeonium|portulacaria|opuntia|mammillaria|kalanchoe|schlumbergera/i.test(t)) {
+                return {
+                    tipo: "Desértica / Suculenta",
+                    umbralIdeal: 15,
+                    luzMin: 8000,
+                    luzMax: 65000,
+                    horasLuzObj: 6,
+                    tempMin: 10,
+                    tempMax: 38,
+                    aireMin: 20
+                };
+            } else if (/fern|calathea|monstera|spathiphyllum|fittonia|araceae|maranta|alocasia|philodendron|epipremnum|syngonium|anthurium|ficus|begonia|asplenium|nephrolepis|croton|aglaonema|caladium|tradescantia|peperomia|dieffenbachia|chlorophytum|mint|helecho/i.test(t)) {
+                return {
+                    tipo: "Tropical / Sombra",
+                    umbralIdeal: 45,
+                    luzMin: 500,
+                    luzMax: 4500,
+                    horasLuzObj: 4,
+                    tempMin: 18,
+                    tempMax: 29,
+                    aireMin: 50
+                };
+            } else {
+                return {
+                    tipo: "Estándar / Templada",
+                    umbralIdeal: 30,
+                    luzMin: 2000,
+                    luzMax: 15000,
+                    horasLuzObj: 5,
+                    tempMin: 14,
+                    tempMax: 32,
+                    aireMin: 35
+                };
+            }
         }
+
         async function enviarAPlantNet(imageBlob) {
             const resultDiv = document.getElementById('plantResult'); resultDiv.style.display = 'block';
-            document.getElementById('plantName').textContent = "Consultando base de datos..."; document.getElementById('plantScore').textContent = ""; document.getElementById('plantDetails').textContent = "";
+            document.getElementById('plantName').textContent = "Consultando base de datos botánica...";
+            document.getElementById('plantScore').textContent = "";
+            document.getElementById('plantDetails').innerHTML = "";
+
             const reader = new FileReader(); reader.readAsDataURL(imageBlob);
             reader.onloadend = async function() {
                 try {
-                    const response = await fetch('https://plant.id/api/v3/identification', { method: 'POST', headers: { 'Api-Key': KINDWISE_API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ images: [reader.result], latitude: -34.6037, longitude: -58.3816, similar_images: true }) });
+                    const response = await fetch('https://plant.id/api/v3/identification?details=best_light_condition,watering&language=es', {
+                        method: 'POST',
+                        headers: { 'Api-Key': KINDWISE_API_KEY, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ images: [reader.result], latitude: -31.4279, longitude: -62.0827, similar_images: true })
+                    });
                     if (!response.ok) throw new Error();
                     const data = await response.json();
+
                     if (data.result && data.result.classification && data.result.classification.suggestions.length > 0) {
                         const top = data.result.classification.suggestions[0];
                         const perfil = asignarPerfilBotanico(data.result.classification.suggestions.slice(0, 3).map(s => s.name).join(" "));
-                        database.ref('/planta/config').update({ umbral_seco: perfil.umbralIdeal });
-                        document.getElementById('plantName').textContent = top.name; document.getElementById('plantScore').textContent = `Precisión: ${(top.probability * 100).toFixed(1)}%`;
-                        document.getElementById('plantDetails').innerHTML = `<strong>Perfil Botánico:</strong> ${perfil.tipo}<br><span style="color: var(--accent-green);">✓ Umbral de riego ajustado a ${perfil.umbralIdeal}%.</span>`;
+
+                        // Guardar perfil multivariable completo en Firebase
+                        database.ref('/planta/config').update({
+                            especie: top.name,
+                            perfil_tipo: perfil.tipo,
+                            umbral_seco: perfil.umbralIdeal,
+                            luz_min: perfil.luzMin,
+                            luz_max: perfil.luzMax,
+                            horas_luz_obj: perfil.horasLuzObj,
+                            temp_min: perfil.tempMin,
+                            temp_max: perfil.tempMax,
+                            aire_min: perfil.aireMin
+                        });
+
+                        let extraInfo = "";
+                        if (top.details) {
+                            if (top.details.best_light_condition) {
+                                extraInfo += `<br><strong>☀️ Luz recomendada (API):</strong> ${top.details.best_light_condition}`;
+                            }
+                            if (top.details.watering && top.details.watering.min) {
+                                extraInfo += `<br><strong>💧 Riego oficial:</strong> Nivel ${top.details.watering.min} a ${top.details.watering.max} (escala 1–3)`;
+                            }
+                        }
+
+                        document.getElementById('plantName').textContent = top.name;
+                        document.getElementById('plantScore').textContent = `Precisión de IA: ${(top.probability * 100).toFixed(1)}%`;
+                        document.getElementById('plantDetails').innerHTML = `
+                            <strong>Perfil Botánico:</strong> ${perfil.tipo}<br>
+                            <strong>Parámetros calibrados:</strong> Suelo mín. ${perfil.umbralIdeal}% • Luz ${perfil.luzMin}–${perfil.luzMax} lx (${perfil.horasLuzObj}h/día) • Temp. ${perfil.tempMin}–${perfil.tempMax}°C
+                            ${extraInfo}
+                            <br><span style="color: var(--accent-green); font-weight: 600; display: inline-block; margin-top: 8px;">✓ Dashboard y hardware actualizados automáticamente.</span>
+                        `;
+                    } else {
+                        document.getElementById('plantName').textContent = "Especie no identificada";
+                        document.getElementById('plantScore').textContent = "Intenta acercar más la cámara a las hojas.";
                     }
-                } catch (error) { document.getElementById('plantName').textContent = "Error de Conexión"; }
+                } catch (error) {
+                    document.getElementById('plantName').textContent = "Error de Conexión";
+                    document.getElementById('plantScore').textContent = "Verifica tu conexión a internet o clave API.";
+                }
             };
         }
     </script>
